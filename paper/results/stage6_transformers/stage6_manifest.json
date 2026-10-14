@@ -1,0 +1,9 @@
+{
+  "run_id": "stage6-20261013T142914Z-seed60613",
+  "sha256": {
+    "stage6_policy_runs.csv": "4ef17a884a078dd63aa1e51021f1f53fc34e8a6484441ce0db36e7ccfdc70990",
+    "stage6_report.md": "08e0e9500285a78bb10c7e10553a4b07cae30d0a8e8a07347d6ccc9043cb23f8",
+    "stage6_results.json": "e60130dd779ac6d69fa3b9cb8142e67ecbef8d699de02ecf6cdfc5a9d3345b7e",
+    "stage6_tuning.json": "4355c9545c673ad60e601fa9443bd12d8a7011344205db4a186ef3c5a2d5b3ea"
+  }
+}

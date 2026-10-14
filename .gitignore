@@ -1,0 +1,33 @@
+# Python caches and environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# C/C++ build outputs
+build/
+dist/
+*.o
+*.a
+*.so
+cpp/pulsar_test
+cpp/pulsar_core_v1_test
+cpp/pulsar_speculative_v2_test
+cpp/pulsar_tree_v3_test
+cpp/pulsar_stage4_bench_test
+cpp/pulsar_stage4_bench
+cpp/pulsar_stage5_native
+
+# LaTeX-generated files
+paper/latex/*.aux
+paper/latex/*.log
+paper/latex/*.out
+paper/latex/*.fls
+paper/latex/*.fdb_latexmk
+paper/latex/*.synctex.gz
+
+# Large Stage 5 raw benchmark artifacts
+paper/results/stage5/workloads/
+paper/results/stage5/*nodes*.csv

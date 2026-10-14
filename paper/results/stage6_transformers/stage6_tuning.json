@@ -1,0 +1,128 @@
+{
+  "best_chain_gamma": 2,
+  "best_fixed_tree": [
+    2,
+    1
+  ],
+  "chain_candidates": [
+    2,
+    4,
+    6
+  ],
+  "chain_tuning_rates": {
+    "2": 13.734198390936967,
+    "4": 11.635414358615071,
+    "6": 11.430838290360116
+  },
+  "confidence_policy": {
+    "actions": [
+      [
+        2,
+        1
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        4,
+        2
+      ]
+    ],
+    "bin_actions": [
+      0,
+      0,
+      0
+    ],
+    "fallback_action": [
+      2,
+      1
+    ],
+    "score_definition": "max draft-model softmax probability at pulse root",
+    "thresholds": [
+      2.2283282688970282e-05,
+      2.2573851481720864e-05
+    ],
+    "utility_table": [
+      {
+        "counts": [
+          32,
+          32,
+          32,
+          32
+        ],
+        "per_action_tokens_per_second": [
+          11.20162227270532,
+          6.225671787928468,
+          3.709921399287693,
+          2.74882411581523
+        ],
+        "selected_action_index": 0
+      },
+      {
+        "counts": [
+          32,
+          32,
+          32,
+          32
+        ],
+        "per_action_tokens_per_second": [
+          11.037538436434005,
+          6.106799867951293,
+          3.853322530802112,
+          2.626965132893859
+        ],
+        "selected_action_index": 0
+      },
+      {
+        "counts": [
+          32,
+          32,
+          32,
+          32
+        ],
+        "per_action_tokens_per_second": [
+          10.82824135650125,
+          6.857869711976977,
+          4.058696077827182,
+          2.7818800571610107
+        ],
+        "selected_action_index": 0
+      }
+    ]
+  },
+  "tokens_per_episode": 24,
+  "tree_actions": [
+    [
+      2,
+      1
+    ],
+    [
+      3,
+      1
+    ],
+    [
+      3,
+      2
+    ],
+    [
+      4,
+      2
+    ]
+  ],
+  "tree_tuning_rates": {
+    "[2, 1]": 10.835973309976447,
+    "[3, 1]": 6.313454595354178,
+    "[3, 2]": 3.8274752657277213,
+    "[4, 2]": 2.703618358642431
+  },
+  "tune_prompts": [
+    "The history of science is",
+    "In a small village,"
+  ],
+  "tune_repeats_per_prompt": 2
+}

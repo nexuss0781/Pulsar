@@ -1,0 +1,28 @@
+==============================================================================
+PULSAR -- theory verification
+==============================================================================
+[PASS] T01 verifier exactness + algebraic identity
+       max TV over 20 trials = 0.01137 (MC noise ~0.006)
+[PASS] T02 expected yield tau=(1-a^{g+1})/(1-a)
+       MC vs exact product formula within 5 MC-se for all alpha grid
+[PASS] T03 speedup formula + closed-form optimal block size
+       argmax_int vs continuous optimum within 1 on 52 (alpha,c) cells; unimodal
+[PASS] T04 divergence: alpha=1-TV, Pinsker, Bretagnolle-Huber
+       Pinsker slack 0.00e+00, BH slack 0.00e+00, MC identity ok=True
+[PASS] T05 water-level block = optimal (brute force)
+       chain slack 1.67e-16, tree slack 3.33e-16 (exact optimality)
+[PASS] T06 rotor: mixing is mass-preserving; stratified readout variance
+       var ratio measured 0.499 vs predicted 0.504; round-robin coverage max-min<=1: True
+[PASS] T07 collapse: Gumbel==Born; temperature limits
+       Gumbel-max == Born softmax for T in {0.2,1,4}; T->0 = argmax
+[PASS] T08 LIF accumulator == pulse timing (closed form == sim)
+       300 random (leak,theta,I): exact match=True; fire-time monotone=True
+[PASS] T09 exactness is a perfect chi-square fit to p
+       24 seeds: chi-square p-values min=0.0252 (no systematic bias)
+[PASS] T10 proposal-agnostic exactness (adversarial & anti-target drafts)
+       max TV under adversarial proposals = 0.01035
+[PASS] T11 calibration machinery sanity
+       ECE perfect 0.0000 vs noisy 0.0884; slopes 1.00/0.67
+------------------------------------------------------------------------------
+11/11 checks passed
+THEORY_EXIT=0
