@@ -1,0 +1,85 @@
+{
+  "stage": 4,
+  "fixture": "existing C++ inputs/model.bin; synthetic order-3 target/order-2 draft Markov toy model",
+  "fixture_is_real_language_model": false,
+  "batch_size": 1,
+  "prompts": {
+    "canonical_5_3_9": [
+      5,
+      3,
+      9
+    ],
+    "alternate_1_4_7": [
+      1,
+      4,
+      7
+    ],
+    "zero_0_0_0": [
+      0,
+      0,
+      0
+    ]
+  },
+  "sampling": "Categorical sampling, temperature 1.0; AR samples p; tree uses full q as effective pi and Stage 3 exact rejection/fall-through sampler.",
+  "fixed_grid": {
+    "depth_positions_including_root": [
+      1,
+      2,
+      4
+    ],
+    "branch_factor": [
+      1,
+      2,
+      4
+    ],
+    "minimum_retained_level_mass": [
+      0.0,
+      0.2,
+      0.4
+    ]
+  },
+  "threshold_definition": "After constructing the configured Stage 3 tree, retain complete levels while the cumulative normalized q mass over retained prefixes at the next level is at least the threshold; truncate the remaining levels. This threshold is benchmark-only, not a trained pulse rule.",
+  "C_T_definition": "Observed steady-clock wall nanoseconds per pulse, including full configured-tree construction, threshold selection/truncation, sampling, and context/output updates.",
+  "Y_T_definition": "Observed emitted tokens divided by pulse count.",
+  "target_timing_note": "Target callback time measures toy-table lookup, context conversion, and row copy; sampler time minus that callback is an inclusive verifier/sampling/integrity-check proxy, not isolated verifier kernel time.",
+  "draft_work_note": "Draft work is counted as toy-table row callbacks and returned probability values; no neural forward pass or FLOP count is represented.",
+  "memory_note": "Tree payload bytes sum vector capacities (node structs, contexts, full q rows, and child indices); allocator metadata and process RSS are excluded.",
+  "instrumentation_note": "Measured wall times include the steady-clock probes used for per-row callback timing; no instrumentation-overhead subtraction is applied.",
+  "kv_cache_bytes": null,
+  "kv_cache_status": "not supported or measured: this fixture has no transformer/KV cache",
+  "model_storage_bytes": 1352240,
+  "model_sha256": "2a74840242082f11718f4ab44c3945f577b5f43c51d2deed0dc4032e90d2e3e1",
+  "raw_csv": "/workspace/pulsar/paper/results/stage4/stage4_raw.csv",
+  "raw_csv_sha256": "c690795e2a68bc3500ccb7b316a7f194e06c0c8317c4ccfedc95a9dd1981a0e0",
+  "summary_csv": "/workspace/pulsar/paper/results/stage4/stage4_summary.csv",
+  "results_report": "/workspace/pulsar/paper/results/stage4/stage4_report.md",
+  "raw_run_count": 252,
+  "summary_point_count": 28,
+  "summary_aggregation": "C(T), Y(T), work, and throughput are pooled from per-run totals; each latency percentile in summary is the mean of that per-run percentile across prompts/repetitions.",
+  "reproduction_commands": [
+    "cd /workspace/pulsar && mkdir -p paper/results/stage4 && cd cpp && make pulsar_stage4_bench CXXFLAGS='-O2 -std=c++17 -march=native -Wall -Wextra -Wpedantic -Werror'",
+    "cd /workspace/pulsar/cpp && ./pulsar_stage4_bench --model inputs/model.bin --tokens 512 --repeats 3 --raw ../paper/results/stage4/stage4_raw.csv",
+    "cd /workspace/pulsar && python3 verification/experiments/summarize_stage4.py --raw paper/results/stage4/stage4_raw.csv --out-dir paper/results/stage4"
+  ],
+  "compiler_flags": "-O2 -std=c++17 -march=native -Wall -Wextra -Wpedantic -Werror",
+  "python_version": "3.12.3",
+  "matplotlib_version": "3.11.2",
+  "plots": [
+    "stage4_cost_yield.png",
+    "stage4_throughput.png",
+    "stage4_verifier_proxy.png"
+  ],
+  "hardware": {
+    "platform": "Linux-6.18.38+-x86_64-with-glibc2.39",
+    "cpu_model": "Intel(R) Xeon(R) Processor @ 2.50GHz",
+    "logical_cpu_count": 8,
+    "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+  },
+  "source_sha256": {
+    "benchmark_cpp": "d87e382b6382d3941b72de327c39cc7168c507e1ae9f4f19784c8c875043c32a",
+    "threshold_header": "f115f4f78e5605c9fe352aea66e490244a655c7d7b1fc839afc73380eb621279",
+    "stage3_tree_sampler": "400a4f62f9bc88cf0ad55635f8bfdbc35743d52ba595ded418f16240594d4b13",
+    "v1_verifier": "78c3cf9c5ff5f8236ab6c74c72d8c14f4f4a67e9c6d9387e987918183acfe19d",
+    "summarizer": "29e8495cdfd9011e6bd0887f8193049c9346dcac5a9225bfddc2eb0581d1d8ec"
+  }
+}

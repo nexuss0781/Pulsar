@@ -1,0 +1,88 @@
+E00  model + exact ground truth
+  V: 20
+  alpha_exact: 0.5871
+  alpha_easy: 0.9071
+  alpha_hard: 0.2476
+  tv_easy: 0.0929
+  tv_hard: 0.7524
+  kl: 1.0188
+  easy_weight: 0.5148
+  pi3_resid: 8.066464163292153e-16
+[PASS] E00.stationary  residual 8.1e-16
+[PASS] E00.alpha_eq_1mtv  
+E0w  warmup (pulsar_fixed, logging) + train confidence net
+  warmup_tokens_logged: 244416
+  train_secs: 2.5
+  weights: [3.679, 2.961, -0.408, 4.369, 0.67, -1.08, 0.337]
+E01  exactness of the full engine across collapse policies
+  modes: [{'mode': 'chain', 'tv': 0.0083, 'chi2_p': 0.2478}, {'mode': 'pulsar', 'tv': 0.0082, 'chi2_p': 0.7695}, {'mode': 'pulsar_fixed', 'tv': 0.0082, 'chi2_p': 0.7695}, {'mode': 'pulsar_max', 'tv': 0.0047, 'chi2_p': 0.7061}, {'mode': 'pulsar_min', 'tv': 0.0052, 'chi2_p': 0.9245}, {'mode': "pulsar{'adv_conf': True}", 'tv': 0.0082, 'chi2_p': 0.7695}, {'mode': "pulsar{'temperature': 4.0}", 'tv': 0.0065, 'chi2_p': 0.3994}, {'mode': "pulsar{'temperature': 0.05}", 'tv': 0.0062, 'chi2_p': 0.429}, {'mode': "pulsar{'theta': 0.999}", 'tv': 0.0082, 'chi2_p': 0.7695}, {'mode': "pulsar{'theta': 1e-09}", 'tv': 0.0082, 'chi2_p': 0.7695}, {'mode': 'pulsar_renorm', 'tv': 0.0062, 'chi2_p': 0.429}]
+[PASS] E01.first_token_exactness  max TV 0.0083 (MC floor ~0.011), min chi2 p 0.2478
+  seq_unigram_chi2_p: 0.2467
+  seq_bigram_chi2_p: 0.0157
+[PASS] E01.sequence_exactness  p=0.247/0.016 — indistinguishable from the base model
+E02  measured depth-0 acceptance == exact 1-TV per regime
+[PASS] E02.acceptance_easy  measured 0.9053 vs exact 0.9071 (z=-0.28)
+[PASS] E02.acceptance_hard  measured 0.2464 vs exact 0.2476 (z=-0.13)
+  e02: {'easy': {'measured': 0.9053, 'se': 0.0064, 'exact': 0.9071, 'z': -0.28}, 'hard': {'measured': 0.2464, 'se': 0.0096, 'exact': 0.2476, 'z': -0.13}}
+E03  adaptive vs fixed vs chain (cost model, 8k tokens each)
+  speedup_ar: 1.0
+  speedup_chain_best: 1.2584
+  chain_best_H: 2
+  speedup_pulsar_adaptive: 1.3882
+  speedup_pulsar_untrained: 1.3124
+  speedup_pulsar_fixed_fullblock: 0.5876
+  speedup_best_fixed_theta: 1.3863
+  best_fixed_theta: 0.07
+  speedup_oracle_ceiling: 1.4233
+  speedup_renorm_ablation: 1.0879
+  sweep: {'chain_H1': 1.2456, 'chain_emit_H1': 1.582, 'chain_H2': 1.2584, 'chain_emit_H2': 1.938, 'chain_H3': 1.1941, 'chain_emit_H3': 2.162, 'chain_H4': 1.1078, 'chain_emit_H4': 2.304, 'chain_H5': 0.9911, 'chain_emit_H5': 2.33, 'chain_H6': 0.9059, 'chain_emit_H6': 2.373, 'chain_H7': 0.8491, 'chain_emit_H7': 2.454, 'chain_H8': 0.7538, 'chain_emit_H8': 2.382, 'chain_H9': 0.6857, 'chain_emit_H9': 2.352, 'chain_H10': 0.6412, 'chain_emit_H10': 2.374, 'fixed_theta0.005': 1.1264, 'fixed_theta0.005_blk': 18.33, 'oracle_theta0.005': 1.1959, 'fixed_theta0.01': 1.2128, 'fixed_theta0.01_blk': 12.58, 'oracle_theta0.01': 1.2936, 'fixed_theta0.02': 1.295, 'fixed_theta0.02_blk': 7.71, 'oracle_theta0.02': 1.3759, 'fixed_theta0.03': 1.3276, 'fixed_theta0.03_blk': 5.73, 'oracle_theta0.03': 1.3982, 'fixed_theta0.04': 1.35, 'fixed_theta0.04_blk': 4.33, 'oracle_theta0.04': 1.4139, 'fixed_theta0.05': 1.3667, 'fixed_theta0.05_blk': 3.4, 'oracle_theta0.05': 1.421, 'fixed_theta0.07': 1.3863, 'fixed_theta0.07_blk': 2.42, 'oracle_theta0.07': 1.42, 'fixed_theta0.1': 1.3828, 'fixed_theta0.1_blk': 1.8, 'oracle_theta0.1': 1.4233, 'fixed_theta0.15': 1.3627, 'fixed_theta0.15_blk': 1.22, 'oracle_theta0.15': 1.3922, 'fixed_theta0.25': 1.3165, 'fixed_theta0.25_blk': 0.82, 'oracle_theta0.25': 1.339}
+[PASS] E03.beats_AR  adaptive 1.388 vs AR 1.0
+[PASS] E03.beats_best_chain  1.388 vs chain γ*=2: 1.258
+[PASS] E03.trained_gt_untrained  trained-adaptive 1.388 vs raw-logit 1.312
+[PASS] E03.adaptive_vs_fixed_full  adaptive 1.388 vs always-full blocks 0.588
+[PASS] E06.renorm_ablation  fall-through 1.388 vs renormalized-tree sampling 1.088
+  e03_secs: 69.8
+E04  M4c confidence field: held-out calibration
+  heldout_n: 195072
+  trained: {'ece': np.float64(0.0007), 'brier': 0.0743, 'auc': 1.0, 'slope': 0.9995, 'intercept': 0.0007}
+  baseline: {'ece': np.float64(0.3662), 'brier': 0.333, 'auc': 1.0, 'slope': 0.3414, 'intercept': 0.5162}
+[PASS] E04.brier_gain  0.0743 < 0.3330
+[PASS] E04.ece  ECE 0.0007
+[PASS] E04.slope  slope 1.00
+  bin_gaps: {'max': 0.007, 'median': 0.0006, 'mass_frac_le_010': 1.0}
+[PASS] E04.bin_identity  isotonic-calibrated M4c: max bin gap 0.0070, median 0.0006, 100.0% of labels in bins with gap <= 0.10
+[PASS] E04.near_oracle_ceiling  trained adaptive 1.388 = 97.5% of oracle-â ceiling 1.423
+E05  M7-A fixed point: theta_ema(t) -> neighborhood of grid optimum
+  theta_final: 0.0575
+  theta_grid_star: 0.07
+  speedup_ema: 1.3753
+  speedup_best_fixed: 1.3863
+[PASS] E05.theta_near_opt  θ→0.0575 vs θ*=0.07 (flat optimum region)
+[PASS] E05.no_worse_than_fixed  adaptive 1.375 vs best fixed 1.386
+E07  easy->hard->easy drift: adaptive vs fixed thresholds
+  drift_latency_EH_EH: {'adaptive': [0.723, 0.718, 0.72, 0.715], 'fixed_theta_easy': [0.829, 0.818, 0.822, 0.827], 'fixed_theta_hard': [0.718, 0.718, 0.72, 0.72]}
+[PASS] E07.drift_robust  adaptive worst phase 0.723 <= best-static worst 0.720 (x1.03)
+E08  M6 pulse clock: per-step work bound
+  m6_bound_units: 8.844
+  m6_max_measured: 1.582
+[PASS] E08.work_bound  max 1.582 ≤ bound 8.844
+  lat_sd_ar_note: AR has zero per-step variance; M6 gives bound, not sd (honest)
+E10  M7-B REINFORCE bandit over theta grid (engine-measured profile)
+  reinforce_theta: 0.07
+  oracle_theta: 0.07
+  oracle_speedup: 1.3863
+  learned_expected_speedup: 1.3863
+[PASS] E10.rl_recovers_optimum  learned policy E[S]=1.3863 vs oracle 1.3863
+E11  analytic regime map (speedup vs alpha, chain vs pulsar)
+  crossover_alpha_pulsar_vs_AR: 0.16432203389830508
+dumped cpp inputs/model.bin
+======================================================================
+21/21 claims passed   (158s)
+RUNALL_EXIT=0
+PULSAR C++ verification
+  (1) fixed-prompt exactness   TV=0.00164  maxZ=3.37   [PASS]
+  (2) vs AR unigram (300k tok)  TV=0.00233            [PASS]
+  (3) speedup=1.387 (cost-model), maxstep=1.60 <= bound=3.56 [PASS]
+  (4) theta=0.0575 in (1e-4, 0.5)                       [PASS]
+  mean emit/step=1.654  steps=181427
+PULSAR_TEST: PASS
