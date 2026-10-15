@@ -231,6 +231,36 @@ std::size_t LlamaModel::max_sequence_count() const noexcept {
     return impl_ == nullptr ? 0 : impl_->sequence_lengths.size();
 }
 
+std::size_t LlamaModel::kv_cache_bytes_per_token_estimate() const noexcept {
+    if (impl_ == nullptr || impl_->model == nullptr) {
+        return 0;
+    }
+    const std::int32_t layers = llama_model_n_layer(impl_->model);
+    const std::int32_t embedding = llama_model_n_embd(impl_->model);
+    const std::int32_t heads = llama_model_n_head(impl_->model);
+    const std::int32_t kv_heads = llama_model_n_head_kv(impl_->model);
+    if (layers <= 0 || embedding <= 0 || heads <= 0 || kv_heads <= 0 || embedding % heads != 0) {
+        return 0;
+    }
+    std::size_t values_per_token = static_cast<std::size_t>(layers);
+    const std::size_t factors[] = {
+        static_cast<std::size_t>(kv_heads),
+        static_cast<std::size_t>(embedding / heads),
+    };
+    for (const std::size_t factor : factors) {
+        if (values_per_token > std::numeric_limits<std::size_t>::max() / factor) {
+            return 0;
+        }
+        values_per_token *= factor;
+    }
+    if (values_per_token > std::numeric_limits<std::size_t>::max() / 4U) {
+        return 0;
+    }
+    // The pinned runtime leaves type_k/type_v at llama.cpp's F16 defaults:
+    // 2 bytes each for one key and one value element per cached position.
+    return values_per_token * 4U;
+}
+
 std::vector<Token> LlamaModel::tokenize(const std::string& text) const {
     if (impl_ == nullptr || impl_->vocabulary == nullptr) {
         throw std::logic_error("model backend is not initialized");

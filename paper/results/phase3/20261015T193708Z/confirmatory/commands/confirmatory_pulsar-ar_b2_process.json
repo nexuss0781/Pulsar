@@ -1,0 +1,8 @@
+{
+  "elapsed_process_seconds": 11.618529428029433,
+  "model_load_ms": 108.792,
+  "outputs_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/confirmatory/outputs/confirmatory_pulsar-ar_b2.jsonl",
+  "peak_rss_bytes_stderr": 82374656,
+  "raw_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/confirmatory/raw/confirmatory_pulsar-ar_b2.jsonl",
+  "return_code": 0
+}

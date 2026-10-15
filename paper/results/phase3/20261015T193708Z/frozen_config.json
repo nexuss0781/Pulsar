@@ -1,0 +1,195 @@
+{
+  "candidate_scores": [
+    {
+      "batch_size": 1,
+      "configuration": {},
+      "median_tokens_per_second": 211.01360449999999,
+      "method": "autoregressive",
+      "raw_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_pulsar-ar_b1.jsonl"
+    },
+    {
+      "batch_size": 1,
+      "configuration": {
+        "n_max": 2
+      },
+      "median_tokens_per_second": 157.47579046630955,
+      "method": "llama.cpp-draft-simple",
+      "raw_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_llama-draft-simple_n2_b1.jsonl"
+    },
+    {
+      "batch_size": 1,
+      "configuration": {
+        "n_max": 4
+      },
+      "median_tokens_per_second": 124.0741984873433,
+      "method": "llama.cpp-draft-simple",
+      "raw_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_llama-draft-simple_n4_b1.jsonl"
+    },
+    {
+      "batch_size": 1,
+      "configuration": {
+        "n_max": 6
+      },
+      "median_tokens_per_second": 94.7144326865192,
+      "method": "llama.cpp-draft-simple",
+      "raw_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_llama-draft-simple_n6_b1.jsonl"
+    },
+    {
+      "batch_size": 1,
+      "configuration": {
+        "branching": 1,
+        "depth": 2
+      },
+      "median_tokens_per_second": 70.32928625,
+      "method": "pulsar-fixed-tree",
+      "raw_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_pulsar-tree_branching1_depth2_b1.jsonl"
+    },
+    {
+      "batch_size": 1,
+      "configuration": {
+        "branching": 2,
+        "depth": 2
+      },
+      "median_tokens_per_second": 53.1312797,
+      "method": "pulsar-fixed-tree",
+      "raw_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_pulsar-tree_branching2_depth2_b1.jsonl"
+    },
+    {
+      "batch_size": 1,
+      "configuration": {
+        "branching": 2,
+        "depth": 3
+      },
+      "median_tokens_per_second": 37.3719247,
+      "method": "pulsar-fixed-tree",
+      "raw_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_pulsar-tree_branching2_depth3_b1.jsonl"
+    },
+    {
+      "batch_size": 2,
+      "configuration": {},
+      "median_tokens_per_second": 249.58441,
+      "method": "autoregressive",
+      "raw_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_pulsar-ar_b2.jsonl"
+    },
+    {
+      "batch_size": 2,
+      "configuration": {
+        "n_max": 2
+      },
+      "median_tokens_per_second": 228.65005292488615,
+      "method": "llama.cpp-draft-simple",
+      "raw_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_llama-draft-simple_n2_b2.jsonl"
+    },
+    {
+      "batch_size": 2,
+      "configuration": {
+        "n_max": 4
+      },
+      "median_tokens_per_second": 154.78200431857337,
+      "method": "llama.cpp-draft-simple",
+      "raw_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_llama-draft-simple_n4_b2.jsonl"
+    },
+    {
+      "batch_size": 2,
+      "configuration": {
+        "n_max": 6
+      },
+      "median_tokens_per_second": 118.69787550943781,
+      "method": "llama.cpp-draft-simple",
+      "raw_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_llama-draft-simple_n6_b2.jsonl"
+    },
+    {
+      "batch_size": 2,
+      "configuration": {
+        "branching": 1,
+        "depth": 2
+      },
+      "median_tokens_per_second": 62.83825035,
+      "method": "pulsar-fixed-tree",
+      "raw_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_pulsar-tree_branching1_depth2_b2.jsonl"
+    },
+    {
+      "batch_size": 2,
+      "configuration": {
+        "branching": 2,
+        "depth": 2
+      },
+      "median_tokens_per_second": 57.99225665,
+      "method": "pulsar-fixed-tree",
+      "raw_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_pulsar-tree_branching2_depth2_b2.jsonl"
+    },
+    {
+      "batch_size": 2,
+      "configuration": {
+        "branching": 2,
+        "depth": 3
+      },
+      "median_tokens_per_second": 38.8630854,
+      "method": "pulsar-fixed-tree",
+      "raw_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_pulsar-tree_branching2_depth3_b2.jsonl"
+    }
+  ],
+  "frozen_at_utc": "2026-10-15T19:39:39+00:00",
+  "prompt_manifest_sha256": "ef127195bff7dabba944ae5adfcfc60e5d0ba6103a6ac9b6ff0000b22fe7065d",
+  "protocol_sha256": "31870e957b24fd84d8713433bf7b71dae10276a1a5ff7d52514d29c34e99ced5",
+  "results": {
+    "by_batch_size": {
+      "1": {
+        "autoregressive_raw": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_pulsar-ar_b1.jsonl",
+        "autoregressive_tuning_median_tokens_per_second": 211.01360449999999,
+        "llama_cpp": {
+          "n_max": 2,
+          "raw": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_llama-draft-simple_n2_b1.jsonl",
+          "tuning_median_tokens_per_second": 157.47579046630955
+        },
+        "pulsar_tree": {
+          "branching": 1,
+          "depth": 2,
+          "node_bound": 3,
+          "raw": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_pulsar-tree_branching1_depth2_b1.jsonl",
+          "tuning_median_tokens_per_second": 70.32928625
+        }
+      },
+      "2": {
+        "autoregressive_raw": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_pulsar-ar_b2.jsonl",
+        "autoregressive_tuning_median_tokens_per_second": 249.58441,
+        "llama_cpp": {
+          "n_max": 2,
+          "raw": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_llama-draft-simple_n2_b2.jsonl",
+          "tuning_median_tokens_per_second": 228.65005292488615
+        },
+        "pulsar_tree": {
+          "branching": 1,
+          "depth": 2,
+          "node_bound": 3,
+          "raw": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_pulsar-tree_branching1_depth2_b2.jsonl",
+          "tuning_median_tokens_per_second": 62.83825035
+        }
+      }
+    },
+    "protocol_revision": 1.1,
+    "tuning_seeds": [
+      1701,
+      2801,
+      3907
+    ]
+  },
+  "selection_rule": "highest median aggregate generated tokens/second across tuning batches; tie-break smaller n_max/node bound",
+  "status": "frozen_before_confirmatory_runs",
+  "tuning_raw_sha256": {
+    "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_llama-draft-simple_n2_b1.jsonl": "6a90c005fa71ed281c5bd96fa28c7dde4ecbeb29ccd8dc56146402cb33095e46",
+    "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_llama-draft-simple_n2_b2.jsonl": "7ae4eebe5211ebe30b8f2be6ff75c78987c229c02bce78f5882fc49835d1e5a1",
+    "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_llama-draft-simple_n4_b1.jsonl": "02c693b0062a2950471fffbae5fc2730fa7bdcb15bfaec703d1f65c5a47651f4",
+    "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_llama-draft-simple_n4_b2.jsonl": "c2eacc06bbc9d2e745ffc7a0f4610adc59d6dd304c5804cca483803ce717bd7a",
+    "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_llama-draft-simple_n6_b1.jsonl": "205ca45d5413cc81583615979682f28a8f0d628c8eca2b5fe9bf1d346e60932f",
+    "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_llama-draft-simple_n6_b2.jsonl": "aa47801eb232314285b8a0482614bc6fe925be1b80dd868f8b0c26a23650a9ef",
+    "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_pulsar-ar_b1.jsonl": "06de44962476b791582f19ec11142520a645f88b726b11b1ea63bc0df949e1cc",
+    "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_pulsar-ar_b2.jsonl": "f59ad58b6e1bda412857e7a184af07c3391a2bc5c0ddd82a342aa6f4028aa799",
+    "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_pulsar-tree_branching1_depth2_b1.jsonl": "a4fc49a2aaf1a3f6ce0dfc70f49eeaa4b7d465bc9759ca291784c070598d42da",
+    "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_pulsar-tree_branching1_depth2_b2.jsonl": "dc45964627822e9adb1358689e748d8aa05fd36026edb1dbfafb2c5ffa23f8ea",
+    "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_pulsar-tree_branching2_depth2_b1.jsonl": "a685654ab7a72dcfba518c1aeae0aae177fdf63911ac96c05d64fd57ac9a3f93",
+    "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_pulsar-tree_branching2_depth2_b2.jsonl": "54eb2efe6937e465e74488e88bde9950bbb0e99d644bfbaa72be2b54b95e10ce",
+    "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_pulsar-tree_branching2_depth3_b1.jsonl": "5e02f8aba0d41b3797659636f3d3239a38169aeb68c4826d7be129482b9dd920",
+    "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_pulsar-tree_branching2_depth3_b2.jsonl": "8bf206091cd490793fcedeaba8c460988b4a0d412004c4bfb6dca664cc1b493b"
+  }
+}

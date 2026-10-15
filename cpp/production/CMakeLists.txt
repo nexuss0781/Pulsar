@@ -87,7 +87,16 @@ if(PULSAR_BUILD_LLAMA_BACKEND)
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         target_compile_options(pulsar-generate PRIVATE -Wall -Wextra -Wpedantic -Werror)
     endif()
+    add_executable(pulsar-phase3-bench
+        src/phase3_bench.cpp
+        src/llama_model.cpp)
+    target_include_directories(pulsar-phase3-bench PRIVATE src ${CMAKE_CURRENT_SOURCE_DIR}/..)
+    target_link_libraries(pulsar-phase3-bench PRIVATE pulsar_runtime llama)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(pulsar-phase3-bench PRIVATE -Wall -Wextra -Wpedantic -Werror)
+    endif()
     set_target_properties(pulsar-generate PROPERTIES INSTALL_RPATH "$ORIGIN/../lib")
+    set_target_properties(pulsar-phase3-bench PROPERTIES INSTALL_RPATH "$ORIGIN/../lib")
     install(TARGETS pulsar-generate RUNTIME DESTINATION bin)
     # The upstream PUBLIC_HEADER lists are source-relative and become relative
     # to this parent project in an install(TARGETS ...) call. The CLI package

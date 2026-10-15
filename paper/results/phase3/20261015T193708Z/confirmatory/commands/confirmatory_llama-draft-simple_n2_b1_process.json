@@ -1,0 +1,8 @@
+{
+  "metrics_available": false,
+  "outputs_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/confirmatory/outputs/confirmatory_llama-draft-simple_n2_b1.jsonl",
+  "peak_rss_bytes": 80289792,
+  "raw_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/confirmatory/raw/confirmatory_llama-draft-simple_n2_b1.jsonl",
+  "return_code_before_terminate": null,
+  "startup_ms": 539.1688580275513
+}

@@ -271,8 +271,13 @@ inline std::vector<GenerationResult> generate_candidate_tree_batch(
                 return make_distribution(logits, context, options.sampling);
             };
 
+            const auto tree_build_started = std::chrono::steady_clock::now();
             const pulsar::v3::CandidateTree tree = pulsar::v3::build_candidate_tree(
                 root_tree_context, branch_factor, pulse_depth, draft_row);
+            result.candidate_tree_build_ms += std::chrono::duration<double, std::milli>(
+                std::chrono::steady_clock::now() - tree_build_started).count();
+            ++result.candidate_tree_pulses;
+            result.candidate_tree_nodes += tree.nodes.size();
             detail::TreeContext last_target_context;
             std::size_t last_target_node = 0;
             const auto target_row = [&](const detail::TreeContext& tree_context) {
@@ -304,12 +309,15 @@ inline std::vector<GenerationResult> generate_candidate_tree_batch(
                 return make_distribution(logits, context, options.sampling);
             };
 
+            const auto tree_verify_started = std::chrono::steady_clock::now();
             const pulsar::v3::CandidateTreeResult block =
                 pulsar::v3::sample_candidate_tree_with_terminal(
                     tree, root_tree_context, target_row, random_engines[request],
                     [&target](detail::TreeToken token) {
                         return target.is_end_token(detail::to_runtime_token(token));
                     });
+            result.candidate_tree_verification_ms += std::chrono::duration<double, std::milli>(
+                std::chrono::steady_clock::now() - tree_verify_started).count();
             if (block.emitted_tokens.empty()) {
                 throw std::logic_error("candidate-tree verifier made no generation progress");
             }
@@ -377,13 +385,19 @@ inline std::vector<GenerationResult> generate_candidate_tree_batch(
                 target.rollback(sequence_id, 0);
                 draft.rollback(sequence_id, 0);
             }
+            if (request_finished) {
+                result.elapsed_ms = std::chrono::duration<double, std::milli>(
+                    std::chrono::steady_clock::now() - started).count();
+            }
         }
     }
 
     const double elapsed = std::chrono::duration<double, std::milli>(
         std::chrono::steady_clock::now() - started).count();
     for (GenerationResult& result : results) {
-        result.elapsed_ms = elapsed;
+        if (result.elapsed_ms == 0.0) {
+            result.elapsed_ms = elapsed;
+        }
     }
     return results;
 }

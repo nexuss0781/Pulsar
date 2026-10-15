@@ -24,7 +24,7 @@ Evidence recorded so far includes a strict x86_64 build, seven runtime test grou
 
 ## Phase 2 — Integrate the exact bounded candidate tree
 
-Status: proposed next.
+Status: implemented and validated locally; publication is tracked separately.
 
 Add a fixed-branching, fixed-depth tree to the production C++ runtime before adding a learned scheduler. Preserve each node's full proposal law. The tree limits continuation work, not token eligibility: draw from the specified effective proposal, verify against the target law, replace rejections from the exact residual, and emit an accepted off-tree token before stopping that pulse. Each branch must retain or correctly reconstruct its own context and KV state. If llama.cpp cannot safely represent or restore the required branch state, stop and redesign rather than silently approximating it.
 
@@ -32,11 +32,13 @@ Exit checks: deterministic pointwise verifier identities over every token in tes
 
 ## Phase 3 — Measure fixed policies and the real cost profile
 
-Status: not started.
+Status: complete; benchmarked on the declared CPU fixture with paired held-out evidence.
 
 On matched target/draft models, CPU, prompts, seeds, batch sizes, output horizons, and sampling processors, compare autoregression, llama.cpp's built-in chain speculation, and fixed Pulsar trees. Tune only on designated tuning prompts; report held-out paired results. Include drafting, target forwards, verifier work, tree management, cache operations, and output overhead in wall time. Record aggregate tokens/second, total batch completion time, per-prompt p50/p95 latency, peak memory/KV use, and work counters. Set acceptance margins and workload definitions before the confirmatory run. Do not train an adaptive policy against an unmeasured or mismatched cost model.
 
 Exit check: reproducible measurements with raw run data and matched baselines; fixed-tree settings and regimes where they win or lose are stated. This phase need not pass a speedup gate to be complete, but it must not overstate results.
+
+Evidence: [`cpp/production/benchmark/PHASE3_PROTOCOL.md`](cpp/production/benchmark/PHASE3_PROTOCOL.md), [`paper/results/phase3/20261015T193708Z/PHASE3_REPORT.md`](paper/results/phase3/20261015T193708Z/PHASE3_REPORT.md), the retained per-batch raw records, outputs, logs, and hashes in that run directory, plus [`analysis_correction.json`](paper/results/phase3/20261015T193708Z/analysis_correction.json). On the TinyStories 15M CPU fixture, neither llama.cpp draft-simple nor the fixed Pulsar tree beat autoregression at batch sizes 1 or 2; these are fixture-specific losses, not a universal performance claim. The initial bootstrap keying error and its preserved report are documented; final estimates use all matched seed/prompt groups, and no raw observations were altered.
 
 ## Phase 4 — Calibrate confidence and test adaptive scheduling
 
@@ -62,4 +64,4 @@ Only after the inference path has a stable contract, select a specific model-qua
 
 ## Immediate proposal
 
-Start Phase 2 by implementing the fixed bounded tree in `cpp/production/`, using the existing exact verifier and llama.cpp adapter. Keep autoregression as the default and fixed chain speculation as a baseline. Do not add a confidence model, bandit, quantum mechanism, model fine-tuning, or speedup claim in this phase. Review the exit tests before proceeding to Phase 3.
+Phase 3 is complete. Before Phase 4, keep the measured autoregressive path as the baseline and use its retained fixed-policy results to define the separate adaptive-scheduling hypothesis, workload split, and acceptance gate. No adaptive scheduler, model training, or speedup claim was added to Phase 3.
