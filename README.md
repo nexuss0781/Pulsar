@@ -146,6 +146,43 @@ The Stage 6 claim passes only if the actual-row exactness checks pass and the he
 
 
 **Stage 6 closeout — run `stage6-20261013T142914Z-seed60613`: exactness passed; scheduler throughput claim not established.** Full-vocabulary pointwise error was `1.08e-19`. Held-out throughput: AR 40.62 tokens/s; tuned chain (γ=2) 15.71; best fixed tree 10.98; confidence tree 11.17. The confidence map selected the fixed action in every bin; its +1.66% point estimate vs fixed tree had 95% CI [−6.71%, +10.01%]. Chain speculation beat the fixed tree by +43.00% [34.87%, 50.79%], but was slower than AR. This is a CPU-only result over three held-out prompts, not evidence of general serving speedup. Detailed report and raw evidence: [`paper/results/stage6_transformers/stage6_report.md`](paper/results/stage6_transformers/stage6_report.md).
+
+## Native C++ inference runtime — production implementation track
+
+`cpp/production/` is a runnable CPU inference path, separate from the earlier reference engine and research benchmarks. It loads local GGUF models through a pinned llama.cpp C API, reuses model/context state across bounded microbatches, and decodes independent requests with distinct KV-cache sequence IDs. The CLI accepts one prompt per input line and emits one JSONL result per prompt. Sampling supports temperature, top-k, top-p, and repetition penalty; each request has an independent, reproducible random stream. Optional `--draft-model` mode uses the existing frozen exact speculative-chain verifier: target and draft proposals use their full processed vocabulary distributions, and rejected KV suffixes are rolled back before the target residual is committed. Target and draft models must use aligned token IDs/vocabularies; prompt token IDs and end-token IDs are checked at runtime.
+
+Build (CMake fetches the pinned llama.cpp source and disables GPU backends and builder-specific `-march=native` tuning):
+
+```bash
+cmake -S cpp/production -B build/pulsar -DCMAKE_BUILD_TYPE=Release
+cmake --build build/pulsar --parallel
+ctest --test-dir build/pulsar --output-on-failure
+```
+
+Run a local GGUF model on a prompt file (one prompt per line):
+
+```bash
+build/pulsar/pulsar-generate \
+  --model /path/to/model.gguf \
+  --input prompts.txt \
+  --output generations.jsonl \
+  --batch-size 2 --context-size 4096 --max-new-tokens 128 --threads 4
+```
+
+To opt into exact chain speculation, provide a compatible draft model:
+
+```bash
+build/pulsar/pulsar-generate \
+  --model /path/to/target.gguf --draft-model /path/to/draft.gguf \
+  --speculative-tokens 4 --input prompts.txt --output generations.jsonl
+```
+
+JSONL includes proposal/acceptance counters and a rejection count. Speculation is deliberately opt-in; acceptance and throughput depend on the draft/target pair and serving workload.
+
+Omit `--input` to read prompt lines from stdin; omit `--output` to write JSONL to stdout. Batch size is a memory/throughput choice: KV capacity scales with `batch-size × context-size`, so start conservatively. To use a pre-existing llama.cpp checkout, pass `-DPULSAR_LLAMA_CPP_SOURCE_DIR=/path/to/llama.cpp -DPULSAR_FETCH_LLAMA_CPP=OFF`. To run dependency-free runtime tests only, configure with `-DPULSAR_BUILD_LLAMA_BACKEND=OFF`.
+
+**Validation and limits:** the llama.cpp-linked executable builds with warnings treated as errors on x86_64; the CTest runtime executable passes all seven internal test groups. ARM64 cross-compilation, QEMU test execution, and real-model smoke generation also pass; native ARM hardware remains untested. Real TinyStories GGUF smoke tests passed in autoregressive and exact speculative modes, including a Q2 target/Q3 draft run with ten rejected blocks across two prompts, exercising real llama.cpp KV rollback. A matched tiny-model run was slower with speculation (about 108 vs. 299 aggregate tokens/s for 80 generated tokens per two-request batch); this is a smoke test, not a benchmark, and no speedup is claimed. The exact production chain path is implemented, but Pulsar's confidence-tree scheduler is not yet wired into serving and the Stage 5/6 scheduler throughput gate remains unmet/not established. See [`cpp/production/STATUS.md`](cpp/production/STATUS.md) for test conditions and remaining release gates. This is a real runnable implementation, but the current evidence is not a production-readiness claim.
+
 ## License
 
 Pulsar is distributed under the GNU Affero General Public License, version 3 (AGPL-3.0). See [`LICENSE`](LICENSE) for the full license text.
