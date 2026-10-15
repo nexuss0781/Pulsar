@@ -30,6 +30,7 @@ public:
     LlamaModel& operator=(LlamaModel&&) noexcept;
 
     std::size_t vocabulary_size() const noexcept override;
+    std::size_t max_sequence_count() const noexcept override;
     std::vector<Token> tokenize(const std::string& text) const override;
     std::string token_to_piece(Token token) const override;
     bool is_end_token(Token token) const noexcept override;
@@ -38,6 +39,8 @@ public:
                  std::vector<std::vector<float>>& next_logits) override;
     void decode_batch(const std::vector<SequenceInput>& inputs,
                       std::vector<std::vector<float>>& next_logits) override;
+    void copy_sequence(std::size_t source_id,
+                       std::size_t destination_id) override;
     void rollback(std::size_t sequence_id, std::size_t new_length) override;
 
 private:

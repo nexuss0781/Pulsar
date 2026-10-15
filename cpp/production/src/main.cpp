@@ -1,5 +1,6 @@
 #include "llama_model.hpp"
 #include "pulsar/speculative_generation.hpp"
+#include "pulsar/tree_generation.hpp"
 
 #include <cerrno>
 #include <cmath>
@@ -33,6 +34,10 @@ struct CliOptions {
     std::size_t batch_tokens = 512;
     std::size_t speculative_tokens = 4;
     bool speculative_tokens_set = false;
+    std::size_t tree_branching = 2;
+    std::size_t tree_depth = 4;
+    bool tree_branching_set = false;
+    bool tree_depth_set = false;
     std::uint64_t seed = 1;
     int threads = 0;
     pulsar::runtime::SamplingConfig sampling{};
@@ -46,8 +51,10 @@ void usage(std::ostream& out) {
         << "Output is one JSON object per prompt to --output FILE (default stdout).\n\n"
         << "Options:\n"
         << "  --model PATH             Required local GGUF model\n"
-        << "  --draft-model PATH       Optional compatible draft GGUF; enables exact chain verification\n"
+        << "  --draft-model PATH       Optional compatible draft GGUF; enables exact speculation\n"
         << "  --speculative-tokens N   Draft proposals per block (default 4; requires --draft-model)\n"
+        << "  --tree-branching N       Opt into fixed candidate tree; retain top N children (default 2)\n"
+        << "  --tree-depth N           Candidate verifier positions per pulse (default 4)\n"
         << "  --input PATH             Prompt lines; use - for stdin (default)\n"
         << "  --output PATH            JSONL output; use - for stdout (default)\n"
         << "  --prompt TEXT            Generate one prompt instead of reading input\n"
@@ -129,6 +136,12 @@ CliOptions parse_args(int argc, char** argv, bool& show_help) {
         } else if (arg == "--speculative-tokens") {
             options.speculative_tokens = parse_size(require_value(i, argc, argv, arg), arg);
             options.speculative_tokens_set = true;
+        } else if (arg == "--tree-branching") {
+            options.tree_branching = parse_size(require_value(i, argc, argv, arg), arg);
+            options.tree_branching_set = true;
+        } else if (arg == "--tree-depth") {
+            options.tree_depth = parse_size(require_value(i, argc, argv, arg), arg);
+            options.tree_depth_set = true;
         } else if (arg == "--input") {
             options.input_path = require_value(i, argc, argv, arg);
         } else if (arg == "--output") {
@@ -174,6 +187,16 @@ CliOptions parse_args(int argc, char** argv, bool& show_help) {
     }
     if (!options.draft_model_path.empty() && options.speculative_tokens == 0) {
         throw std::invalid_argument("--speculative-tokens must be positive");
+    }
+    const bool tree_mode = options.tree_branching_set || options.tree_depth_set;
+    if (tree_mode && options.draft_model_path.empty()) {
+        throw std::invalid_argument("--tree-branching/--tree-depth require --draft-model");
+    }
+    if (tree_mode && options.speculative_tokens_set) {
+        throw std::invalid_argument("candidate-tree options cannot be combined with --speculative-tokens");
+    }
+    if (tree_mode && options.tree_depth == 0) {
+        throw std::invalid_argument("--tree-depth must be positive");
     }
     if (options.batch_size == 0 || options.context_size == 0 || options.batch_tokens == 0) {
         throw std::invalid_argument("batch size, context size, and batch tokens must be positive");
@@ -278,13 +301,21 @@ void process_prompts(LlamaModel& model,
                      const std::vector<std::string>& prompts,
                      const GenerationOptions& generation,
                      std::size_t speculative_tokens,
+                     bool tree_mode,
+                     std::size_t tree_branching,
+                     std::size_t tree_depth,
                      std::uint64_t first_id,
                      std::ostream& output) {
     const auto results = draft_model == nullptr
         ? pulsar::runtime::generate_batch(model, prompts, generation, first_id)
-        : pulsar::runtime::generate_speculative_batch(
-              model, *draft_model, prompts, generation, speculative_tokens, first_id);
-    const char* mode = draft_model == nullptr ? "autoregressive" : "exact_speculative_chain";
+        : (tree_mode
+            ? pulsar::runtime::generate_candidate_tree_batch(
+                  model, *draft_model, prompts, generation, tree_branching,
+                  tree_depth, first_id)
+            : pulsar::runtime::generate_speculative_batch(
+                  model, *draft_model, prompts, generation, speculative_tokens, first_id));
+    const char* mode = draft_model == nullptr ? "autoregressive"
+        : (tree_mode ? "exact_candidate_tree" : "exact_speculative_chain");
     for (std::size_t i = 0; i < results.size(); ++i) {
         write_result(output, static_cast<std::size_t>(first_id) + i, mode, results[i]);
     }
@@ -320,7 +351,15 @@ int main(int argc, char** argv) {
         backend_options.max_context_tokens = cli.context_size;
         backend_options.max_sequences = cli.batch_size;
         backend_options.batch_tokens = cli.batch_tokens;
-        if (!cli.draft_model_path.empty()) {
+        const bool tree_mode = cli.tree_branching_set || cli.tree_depth_set;
+        if (tree_mode) {
+            const std::size_t node_bound = pulsar::runtime::candidate_tree_node_bound(
+                cli.tree_branching, cli.tree_depth);
+            if (node_bound > std::numeric_limits<std::size_t>::max() / cli.batch_size) {
+                throw std::length_error("candidate-tree batch sequence capacity overflows this platform");
+            }
+            backend_options.max_sequences = cli.batch_size * node_bound;
+        } else if (!cli.draft_model_path.empty()) {
             if (cli.speculative_tokens > std::numeric_limits<std::size_t>::max() / cli.batch_size) {
                 throw std::length_error("speculative batch token capacity overflows this platform");
             }
@@ -346,7 +385,8 @@ int main(int argc, char** argv) {
 
         if (cli.has_prompt) {
             process_prompts(model, draft_model.get(), {cli.prompt}, generation,
-                            cli.speculative_tokens, 0, *output);
+                            cli.speculative_tokens, tree_mode, cli.tree_branching,
+                            cli.tree_depth, 0, *output);
             return 0;
         }
 
@@ -371,7 +411,8 @@ int main(int argc, char** argv) {
             prompts.push_back(line);
             if (prompts.size() == cli.batch_size) {
                 process_prompts(model, draft_model.get(), prompts, generation,
-                                cli.speculative_tokens, request_id, *output);
+                                cli.speculative_tokens, tree_mode, cli.tree_branching,
+                                cli.tree_depth, request_id, *output);
                 request_id += prompts.size();
                 prompts.clear();
             }
@@ -381,7 +422,8 @@ int main(int argc, char** argv) {
         }
         if (!prompts.empty()) {
             process_prompts(model, draft_model.get(), prompts, generation,
-                            cli.speculative_tokens, request_id, *output);
+                            cli.speculative_tokens, tree_mode, cli.tree_branching,
+                            cli.tree_depth, request_id, *output);
         }
         return 0;
     } catch (const std::exception& error) {

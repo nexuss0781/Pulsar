@@ -25,10 +25,14 @@ include(CTest)
 if(BUILD_TESTING)
     add_executable(pulsar_runtime_tests tests/runtime_tests.cpp)
     target_link_libraries(pulsar_runtime_tests PRIVATE pulsar_runtime)
+    add_executable(pulsar_tree_v3_tests "${CMAKE_CURRENT_SOURCE_DIR}/../pulsar_tree_v3_test.cpp")
+    target_link_libraries(pulsar_tree_v3_tests PRIVATE pulsar_runtime)
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         target_compile_options(pulsar_runtime_tests PRIVATE -Werror)
+        target_compile_options(pulsar_tree_v3_tests PRIVATE -Wall -Wextra -Wpedantic -Werror)
     endif()
     add_test(NAME pulsar_runtime_tests COMMAND pulsar_runtime_tests)
+    add_test(NAME pulsar_tree_v3_tests COMMAND pulsar_tree_v3_tests)
 endif()
 
 if(PULSAR_BUILD_LLAMA_BACKEND)
@@ -100,6 +104,7 @@ install(DIRECTORY include/pulsar DESTINATION include)
 install(FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/../pulsar_core_v1.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/../pulsar_speculative_v2.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../pulsar_tree_v3.hpp"
     DESTINATION include)
 install(EXPORT PulsarRuntimeTargets
     FILE PulsarRuntimeTargets.cmake

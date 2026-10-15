@@ -227,6 +227,10 @@ std::size_t LlamaModel::vocabulary_size() const noexcept {
     return impl_ == nullptr ? 0 : static_cast<std::size_t>(impl_->vocab_size);
 }
 
+std::size_t LlamaModel::max_sequence_count() const noexcept {
+    return impl_ == nullptr ? 0 : impl_->sequence_lengths.size();
+}
+
 std::vector<Token> LlamaModel::tokenize(const std::string& text) const {
     if (impl_ == nullptr || impl_->vocabulary == nullptr) {
         throw std::logic_error("model backend is not initialized");
@@ -438,6 +442,29 @@ void LlamaModel::rollback(std::size_t sequence_id, std::size_t new_length) {
             "llama.cpp backend cannot remove a partial sequence suffix; use autoregressive mode");
     }
     impl_->sequence_lengths[sequence_id] = new_length;
+}
+
+void LlamaModel::copy_sequence(std::size_t source_id,
+                               std::size_t destination_id) {
+    if (impl_ == nullptr || impl_->context == nullptr) {
+        throw std::logic_error("model backend is not initialized");
+    }
+    if (source_id >= impl_->sequence_lengths.size() ||
+        destination_id >= impl_->sequence_lengths.size()) {
+        throw std::out_of_range("KV copy sequence ID is out of range");
+    }
+    if (source_id == destination_id) {
+        return;
+    }
+    llama_memory_t memory = llama_get_memory(impl_->context);
+    const bool removed = llama_memory_seq_rm(
+        memory, static_cast<llama_seq_id>(destination_id), 0, -1);
+    if (!removed) {
+        throw std::runtime_error("llama.cpp could not clear the destination sequence before KV copy");
+    }
+    llama_memory_seq_cp(memory, static_cast<llama_seq_id>(source_id),
+                        static_cast<llama_seq_id>(destination_id), 0, -1);
+    impl_->sequence_lengths[destination_id] = impl_->sequence_lengths[source_id];
 }
 
 }  // namespace pulsar::runtime
