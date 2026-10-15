@@ -45,6 +45,7 @@ enum class StopReason {
     rejected,
     no_retained_child,
     depth_limit,
+    terminal_token,
 };
 
 struct CandidateTreeResult {
@@ -75,13 +76,15 @@ inline std::vector<Token> retained_tokens(v1::DistributionView q,
 
 // This implementation accepts a two-argument accessor so the default overload
 // can return the exact full q row stored on the current node (pi = q).
-template <class TargetRowFn, class EffectivePiAccessor, class URBG>
+template <class TargetRowFn, class EffectivePiAccessor, class URBG,
+          class TerminalTokenFn>
 inline CandidateTreeResult sample_candidate_tree_impl(
     const CandidateTree& tree,
     const Context& initial_context,
     TargetRowFn&& target_row,
     EffectivePiAccessor&& effective_pi_at_node,
-    URBG& rng) {
+    URBG& rng,
+    TerminalTokenFn&& is_terminal_token) {
     if (tree.nodes.empty() || tree.max_depth == 0 || tree.vocabulary_size == 0) {
         throw std::invalid_argument("candidate tree must have a root and positive depth");
     }
@@ -131,6 +134,11 @@ inline CandidateTreeResult sample_candidate_tree_impl(
         // The accepted draw always remains eligible, even when pruning omitted it.
         result.emitted_tokens.push_back(checked.proposal_token);
         ++result.accepted_count;
+
+        if (is_terminal_token(checked.proposal_token)) {
+            result.stop_reason = StopReason::terminal_token;
+            return result;
+        }
 
         if (step + 1 == tree.max_depth) {
             result.stop_reason = StopReason::depth_limit;
@@ -250,7 +258,26 @@ inline CandidateTreeResult sample_candidate_tree(
         return effective_pi_row(context);
     };
     return detail::sample_candidate_tree_impl(
-        tree, initial_context, std::forward<TargetRowFn>(target_row), accessor, rng);
+        tree, initial_context, std::forward<TargetRowFn>(target_row), accessor,
+        rng, [](Token) { return false; });
+}
+
+template <class TargetRowFn, class EffectivePiRowFn, class URBG,
+          class TerminalTokenFn>
+inline CandidateTreeResult sample_candidate_tree_with_terminal(
+    const CandidateTree& tree,
+    const Context& initial_context,
+    TargetRowFn&& target_row,
+    EffectivePiRowFn&& effective_pi_row,
+    URBG& rng,
+    TerminalTokenFn&& is_terminal_token) {
+    auto accessor = [&effective_pi_row](const Context& context,
+                                        const CandidateTreeNode&) {
+        return effective_pi_row(context);
+    };
+    return detail::sample_candidate_tree_impl(
+        tree, initial_context, std::forward<TargetRowFn>(target_row), accessor,
+        rng, std::forward<TerminalTokenFn>(is_terminal_token));
 }
 
 // Convenience path for the unprocessed-proposal case pi = the full stored q.
@@ -263,7 +290,23 @@ inline CandidateTreeResult sample_candidate_tree(const CandidateTree& tree,
         return node.q;
     };
     return detail::sample_candidate_tree_impl(
-        tree, initial_context, std::forward<TargetRowFn>(target_row), accessor, rng);
+        tree, initial_context, std::forward<TargetRowFn>(target_row), accessor,
+        rng, [](Token) { return false; });
+}
+
+template <class TargetRowFn, class URBG, class TerminalTokenFn>
+inline CandidateTreeResult sample_candidate_tree_with_terminal(
+    const CandidateTree& tree,
+    const Context& initial_context,
+    TargetRowFn&& target_row,
+    URBG& rng,
+    TerminalTokenFn&& is_terminal_token) {
+    auto accessor = [](const Context&, const CandidateTreeNode& node) {
+        return node.q;
+    };
+    return detail::sample_candidate_tree_impl(
+        tree, initial_context, std::forward<TargetRowFn>(target_row), accessor,
+        rng, std::forward<TerminalTokenFn>(is_terminal_token));
 }
 
 }  // namespace pulsar::v3

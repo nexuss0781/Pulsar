@@ -1,6 +1,8 @@
 #include "pulsar/batch_generation.hpp"
 #include "pulsar/speculative_generation.hpp"
+#include "pulsar/tree_generation.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -9,6 +11,7 @@
 #include <random>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -39,6 +42,7 @@ public:
     explicit FakeModel(int root_override = -1) : root_override_(root_override) {}
 
     std::size_t vocabulary_size() const noexcept override { return 4; }
+    std::size_t max_sequence_count() const noexcept override { return 256; }
 
     std::vector<pulsar::runtime::Token> tokenize(const std::string& text) const override {
         if (text == "A") return {0};
@@ -80,7 +84,8 @@ public:
                       std::vector<std::vector<float>>& next_logits) override {
         next_logits.clear();
         for (const auto& input : inputs) {
-            require(input.sequence_id < histories.size(), "fake sequence ID out of range");
+            require(input.sequence_id < max_sequence_count(), "fake sequence ID out of range");
+            require(input.sequence_id < histories.size(), "fake sequence has no copied or prefetched KV state");
             require(input.position == histories[input.sequence_id].size(),
                     "fake decode position is stale");
             histories[input.sequence_id].push_back(input.token);
@@ -89,16 +94,31 @@ public:
         ++decode_batch_count;
     }
 
+    void copy_sequence(std::size_t source_id, std::size_t destination_id) override {
+        require(source_id < histories.size(), "fake KV copy source has no state");
+        require(destination_id < max_sequence_count(), "fake KV copy destination is out of range");
+        if (source_id == destination_id) return;
+        if (histories.size() <= destination_id) histories.resize(destination_id + 1);
+        histories[destination_id] = histories[source_id];
+        ++copy_count;
+    }
+
     void rollback(std::size_t sequence_id, std::size_t new_length) override {
-        require(sequence_id < histories.size(), "fake rollback sequence ID out of range");
+        require(sequence_id < max_sequence_count(), "fake rollback sequence ID out of range");
+        if (histories.size() <= sequence_id) histories.resize(sequence_id + 1);
         require(new_length <= histories[sequence_id].size(), "fake rollback length out of range");
         histories[sequence_id].resize(new_length);
         ++rollback_count;
     }
 
+    const std::vector<pulsar::runtime::Token>& sequence_history(std::size_t id) const {
+        return histories.at(id);
+    }
+
     std::size_t reset_count = 0;
     std::size_t prefill_count = 0;
     std::size_t decode_batch_count = 0;
+    std::size_t copy_count = 0;
     std::size_t rollback_count = 0;
 
 private:
@@ -305,6 +325,151 @@ void test_exact_speculative_chain_and_rollback() {
             "rejection must roll back provisional KV suffixes on both models");
 }
 
+void test_candidate_tree_bound_and_pointwise_verifier_identity() {
+    using pulsar::v1::Weights;
+    require(pulsar::runtime::candidate_tree_node_bound(0, 8) == 1,
+            "zero-branch tree should contain only its root");
+    require(pulsar::runtime::candidate_tree_node_bound(2, 4) == 15,
+            "candidate-tree node bound is incorrect");
+
+    const std::vector<std::pair<Weights, Weights>> laws{
+        {{0.65, 0.25, 0.10}, {0.20, 0.50, 0.30}},
+        {{0.0, 0.7, 0.3}, {0.4, 0.0, 0.6}},
+        {{0.2, 0.3, 0.5}, {0.2, 0.3, 0.5}},
+    };
+    constexpr long double tolerance = 3.0e-15L;
+    for (const auto& law : laws) {
+        const Weights& p_weights = law.first;
+        const Weights& pi_weights = law.second;
+        const auto p_view = pulsar::v1::DistributionView(p_weights);
+        const auto pi_view = pulsar::v1::DistributionView(pi_weights);
+        const long double p_sum = pulsar::v1::detail::total_mass(p_view);
+        const long double pi_sum = pulsar::v1::detail::total_mass(pi_view);
+        const long double residual_mass = pulsar::v1::residual_mass(p_view, pi_view);
+        Weights residual(p_weights.size(), 0.0);
+        if (residual_mass > 0.0L) {
+            residual = pulsar::v1::residual_distribution(p_view, pi_view);
+        }
+        for (std::size_t token = 0; token < p_weights.size(); ++token) {
+            const long double p = static_cast<long double>(p_weights[token]) / p_sum;
+            const long double pi = static_cast<long double>(pi_weights[token]) / pi_sum;
+            const long double acceptance = pi > 0.0L ? std::min(1.0L, p / pi) : 0.0L;
+            const long double reconstructed = pi * acceptance + residual_mass * residual[token];
+            require(std::abs(reconstructed - p) <= tolerance,
+                    "pi*a + Z*r = p failed for a production-tree effective proposal row");
+        }
+    }
+}
+
+void test_candidate_tree_rejects_at_every_depth() {
+    using namespace pulsar::v3;
+    const Context root{0};
+    for (std::size_t reject_depth = 0; reject_depth < 4; ++reject_depth) {
+        const CandidateTree tree = build_candidate_tree(
+            root, 1, 4, [](const Context&) { return Weights{1.0, 0.0}; });
+        std::size_t target_calls = 0;
+        const auto target_row = [&](const Context& context) {
+            ++target_calls;
+            return context.size() == root.size() + reject_depth
+                ? Weights{0.0, 1.0}
+                : Weights{1.0, 0.0};
+        };
+        std::mt19937_64 rng(0xD3E7U + reject_depth);
+        const CandidateTreeResult block = sample_candidate_tree(
+            tree, root, target_row, rng);
+        require(block.rejected_position == reject_depth &&
+                    block.accepted_count == reject_depth &&
+                    block.emitted_tokens.size() == reject_depth + 1,
+                "tree rejection did not occur at the requested verifier depth");
+        for (std::size_t i = 0; i < reject_depth; ++i) {
+            require(block.emitted_tokens[i] == 0,
+                    "accepted tree prefix changed before rejection");
+        }
+        require(block.emitted_tokens.back() == 1 && target_calls == reject_depth + 1,
+                "tree rejection did not use the exact residual and stop the pulse");
+    }
+}
+
+void test_candidate_tree_terminal_token_stops() {
+    using namespace pulsar::v3;
+    const Context root{0};
+    const CandidateTree tree = build_candidate_tree(
+        root, 1, 4, [](const Context&) { return Weights{0.0, 0.0, 0.0, 1.0}; });
+    std::size_t target_calls = 0;
+    std::mt19937_64 rng(17);
+    const CandidateTreeResult block = sample_candidate_tree_with_terminal(
+        tree, root,
+        [&target_calls](const Context&) {
+            ++target_calls;
+            return Weights{0.0, 0.0, 0.0, 1.0};
+        }, rng, [](Token token) { return token == 3; });
+    require(block.emitted_tokens == std::vector<Token>{3} &&
+                block.stop_reason == StopReason::terminal_token && target_calls == 1,
+            "accepted end token did not stop candidate-tree continuation");
+}
+
+void test_candidate_tree_runtime_commit_and_rollback() {
+    using namespace pulsar::runtime;
+    GenerationOptions options;
+    options.max_new_tokens = 3;
+    options.max_context_tokens = 16;
+    options.batch_size = 1;
+    options.seed = 91;
+    options.sampling.temperature = 0.0;
+    options.sampling.top_k = 0;
+    options.sampling.top_p = 1.0;
+
+    FakeModel target(2);
+    FakeModel draft(1);
+    const auto result = generate_candidate_tree_batch(target, draft, {"A"}, options,
+                                                       1, 2);
+    require(result.size() == 1 && result[0].text == "BAb" &&
+                result[0].generated_tokens == 3 &&
+                result[0].finish_reason == FinishReason::max_tokens,
+            "candidate-tree output or stopping behavior is incorrect");
+    require(result[0].draft_proposals == 3 && result[0].accepted_proposals == 2 &&
+                result[0].rejected_blocks == 1,
+            "candidate-tree proposal diagnostics do not match rejection/acceptance");
+    require(target.copy_count > 0 && draft.copy_count > 0 &&
+                target.rollback_count >= 2 && draft.rollback_count >= 2,
+            "tree branches were not cloned, committed, and cleared");
+    require(target.sequence_history(0) == std::vector<Token>({0, 2}) &&
+                draft.sequence_history(0) == std::vector<Token>({0, 2}),
+            "the residual replacement was not committed into both root KV states");
+    require(target.sequence_history(1).empty() && draft.sequence_history(1).empty(),
+            "candidate branch KV was not rolled back after the pulse");
+}
+
+void test_candidate_tree_batch_isolation_and_capacity() {
+    using namespace pulsar::runtime;
+    GenerationOptions options;
+    options.max_new_tokens = 8;
+    options.max_context_tokens = 16;
+    options.batch_size = 2;
+    options.seed = 1234;
+    options.sampling.temperature = 0.0;
+    options.sampling.top_k = 0;
+    options.sampling.top_p = 1.0;
+
+    FakeModel autoregressive;
+    const auto reference = generate_batch(autoregressive, {"A", "B"}, options, 40);
+    FakeModel target;
+    FakeModel draft;
+    const auto tree = generate_candidate_tree_batch(target, draft, {"A", "B"},
+                                                     options, 2, 3, 40);
+    require(tree.size() == reference.size(), "tree batch result count mismatch");
+    for (std::size_t i = 0; i < tree.size(); ++i) {
+        require(tree[i].text == reference[i].text &&
+                    tree[i].generated_tokens == reference[i].generated_tokens &&
+                    tree[i].finish_reason == reference[i].finish_reason,
+                "candidate tree leaked or swapped request state");
+    }
+
+    require_throws([&] {
+        (void)generate_candidate_tree_batch(target, draft, {"A"}, options, 4, 5);
+    }, "candidate tree exceeded backend sequence capacity without failing");
+}
+
 }  // namespace
 
 int main() {
@@ -316,7 +481,12 @@ int main() {
         test_batched_generation_and_cache_isolation();
         test_limits_seed_and_empty_batch();
         test_exact_speculative_chain_and_rollback();
-        std::cout << "Pulsar production runtime tests: PASS (7 groups)\n";
+        test_candidate_tree_bound_and_pointwise_verifier_identity();
+        test_candidate_tree_rejects_at_every_depth();
+        test_candidate_tree_terminal_token_stops();
+        test_candidate_tree_runtime_commit_and_rollback();
+        test_candidate_tree_batch_isolation_and_capacity();
+        std::cout << "Pulsar production runtime tests: PASS (12 groups)\n";
         return 0;
     } catch (const std::exception& error) {
         std::cerr << "Pulsar production runtime tests: FAIL: " << error.what() << '\n';

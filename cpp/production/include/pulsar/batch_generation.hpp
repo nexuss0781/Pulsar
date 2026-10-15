@@ -18,14 +18,15 @@ struct SequenceInput {
     Token token = 0;
 };
 
-// Backend contract for one bounded group of independent sequences. Implementors
-// must return next-token logits in request/input order and isolate sequence KV
-// state by sequence_id. reset() begins a fresh group without reloading weights;
-// rollback() must remove a provisional suffix from exactly the requested token.
+// Backend contract for bounded independent sequences. Implementors must return
+// next-token logits in request/input order and isolate sequence KV by sequence_id.
+// copy_sequence() replaces its destination with an exact source-prefix copy;
+// rollback() removes a suffix from exactly the requested token.
 class Model {
 public:
     virtual ~Model() = default;
     virtual std::size_t vocabulary_size() const noexcept = 0;
+    virtual std::size_t max_sequence_count() const noexcept = 0;
     virtual std::vector<Token> tokenize(const std::string& text) const = 0;
     virtual std::string token_to_piece(Token token) const = 0;
     virtual bool is_end_token(Token token) const noexcept = 0;
@@ -34,6 +35,8 @@ public:
                         std::vector<std::vector<float>>& next_logits) = 0;
     virtual void decode_batch(const std::vector<SequenceInput>& inputs,
                               std::vector<std::vector<float>>& next_logits) = 0;
+    virtual void copy_sequence(std::size_t source_id,
+                               std::size_t destination_id) = 0;
     virtual void rollback(std::size_t sequence_id, std::size_t new_length) = 0;
 };
 
