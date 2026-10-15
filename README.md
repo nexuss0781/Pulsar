@@ -7,6 +7,8 @@
 > **Stage 2 speculative chain:** see [`algorithm_v2_speculative.md`](algorithm_v2_speculative.md).
 >
 > **Stage 3 bounded candidate tree:** see [`algorithm_v3_tree.md`](algorithm_v3_tree.md).
+>
+> **Working vision:** see [`VISION.md`](VISION.md) for Pulsar's goal and success criteria.
 
 A verified mathematical design + reference implementation + verification
 harness for **Pulsar**: a fast inference engine that holds multiple candidate
