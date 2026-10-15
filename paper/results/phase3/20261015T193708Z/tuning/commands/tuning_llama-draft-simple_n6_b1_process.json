@@ -1,0 +1,8 @@
+{
+  "metrics_available": false,
+  "outputs_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/outputs/tuning_llama-draft-simple_n6_b1.jsonl",
+  "peak_rss_bytes": 79360000,
+  "raw_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_llama-draft-simple_n6_b1.jsonl",
+  "return_code_before_terminate": null,
+  "startup_ms": 504.1101899696514
+}

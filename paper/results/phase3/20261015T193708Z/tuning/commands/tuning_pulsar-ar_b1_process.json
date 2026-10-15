@@ -1,0 +1,8 @@
+{
+  "elapsed_process_seconds": 4.077246562985238,
+  "model_load_ms": 62.122,
+  "outputs_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/outputs/tuning_pulsar-ar_b1.jsonl",
+  "peak_rss_bytes_stderr": 37953536,
+  "raw_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_pulsar-ar_b1.jsonl",
+  "return_code": 0
+}

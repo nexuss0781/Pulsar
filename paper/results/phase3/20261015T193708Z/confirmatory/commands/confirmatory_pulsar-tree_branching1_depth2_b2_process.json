@@ -1,0 +1,8 @@
+{
+  "elapsed_process_seconds": 75.11591575102648,
+  "model_load_ms": 144.458,
+  "outputs_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/confirmatory/outputs/confirmatory_pulsar-tree_branching1_depth2_b2.jsonl",
+  "peak_rss_bytes_stderr": 82374656,
+  "raw_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/confirmatory/raw/confirmatory_pulsar-tree_branching1_depth2_b2.jsonl",
+  "return_code": 0
+}

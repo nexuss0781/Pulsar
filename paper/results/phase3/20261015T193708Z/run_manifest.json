@@ -1,0 +1,120 @@
+{
+  "created_at_utc": "2026-10-15T19:37:08+00:00",
+  "draft_model": {
+    "path": "/tmp/pulsar-smoke-draft.gguf",
+    "sha256": "58e4a0c44851897f4007f9c9018822348f7d74851790fa0ea1370ed82c36e003",
+    "size_bytes": 14028384
+  },
+  "fixed_settings": {
+    "batch_sizes": [
+      1,
+      2
+    ],
+    "batch_tokens": 512,
+    "builtin_candidates": [
+      2,
+      4,
+      6
+    ],
+    "confirmatory_seeds": [
+      5101,
+      6203,
+      7307,
+      8407,
+      9509,
+      10613,
+      11717,
+      12821,
+      13901,
+      15013
+    ],
+    "context_size": 256,
+    "output_horizon": 64,
+    "sampling": {
+      "repeat_last_n": 64,
+      "repeat_penalty": 1.0,
+      "temperature": 0.8,
+      "top_k": 40,
+      "top_p": 0.95
+    },
+    "threads": 2,
+    "tree_candidates": [
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        2,
+        3
+      ]
+    ],
+    "tuning_seeds": [
+      1701,
+      2801,
+      3907
+    ]
+  },
+  "host": {
+    "cpu_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "cpu_model": "Intel(R) Xeon(R) Processor @ 2.50GHz",
+    "environment": {
+      "OMP_DYNAMIC": null,
+      "OMP_NUM_THREADS": null,
+      "OPENBLAS_NUM_THREADS": null
+    },
+    "kernel": "6.18.38+",
+    "logical_cpus_visible": 8,
+    "machine": "x86_64",
+    "mem_total_bytes": 25383874560,
+    "platform": "Linux-6.18.38+-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]"
+  },
+  "phase3_source_sha256": {
+    "cpp/production/CMakeLists.txt": "995f55df92abeaeff8d0ae067b9bc5f6137c72b0629d4c96ad7273ad89e07837",
+    "cpp/production/benchmark/PHASE3_PROTOCOL.md": "31870e957b24fd84d8713433bf7b71dae10276a1a5ff7d52514d29c34e99ced5",
+    "cpp/production/benchmark/prompts.jsonl": "ef127195bff7dabba944ae5adfcfc60e5d0ba6103a6ac9b6ff0000b22fe7065d",
+    "cpp/production/benchmark/run_phase3.py": "459d0efd13aa7ff8b781e8e8eaa3cbe3fc759de4bebf78d087eadddca9e96345",
+    "cpp/production/include/pulsar/batch_generation.hpp": "b290cc0e241ae15027075155eb7206950ccd5e02c7bb2a33022d649585878c10",
+    "cpp/production/include/pulsar/tree_generation.hpp": "b759b9ad935a75a1f18b1da27f33c845dc86efb6104c448498050cf422d9f334",
+    "cpp/production/src/llama_model.cpp": "b4249b78c382e6c30dccd640206d73d15af04f23c04bec3c87b20806fba5c9dc",
+    "cpp/production/src/llama_model.hpp": "3849ace70d5e6be48fcbf3e66da6074cee36551d863907b778c6ce0faa44ec35",
+    "cpp/production/src/phase3_bench.cpp": "e5fa378770c3596623a76d126485f1f9d463d9fcc20370cc8afec44df8ad8b57"
+  },
+  "phase_requested": "tuning",
+  "prompt_manifest_sha256": "ef127195bff7dabba944ae5adfcfc60e5d0ba6103a6ac9b6ff0000b22fe7065d",
+  "protocol_revision": 1.1,
+  "protocol_sha256": "31870e957b24fd84d8713433bf7b71dae10276a1a5ff7d52514d29c34e99ced5",
+  "run_id": "20261015T193708Z",
+  "scope_note": "No adaptive scheduling; no changes to the shared publishing checkout.",
+  "source_snapshot_commit": "aca5c2502a76a41ee1022bd2f6d73a1dae42c473",
+  "target_model": {
+    "path": "/tmp/pulsar-smoke.gguf",
+    "sha256": "f7e39dc9f26f3d39bf59e885349c6eec65880f685322d591f53e6cdb46ceb2e9",
+    "size_bytes": 13717344
+  },
+  "tools": {
+    "cxx_compiler": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+    "llama_cpp_cmake_cache_sha256": "7ec77d4df966fc5a92c1339ac39da1155b248db7205689ed622e485494f277a2",
+    "llama_server": "/tmp/llama-phase3-upstream/bin/llama-server",
+    "llama_server_sha256": "b20a1a65411aed24f711deec517d522846e5dbd93cad5a89bb54121948f4d236",
+    "llama_server_version": "version: 0.6.0-dev (build 1, commit cd0a5b6)\nbuilt with GNU 13.3.0 for Linux x86_64",
+    "pulsar_cmake_cache_sha256": "e395bc00d94b0f5809f29f765cc9d5440e1432bdbb9607ec7c55c46e5e2d0fe4",
+    "pulsar_phase3_bench": "/tmp/pulsar-phase3-build/pulsar-phase3-bench",
+    "pulsar_phase3_bench_sha256": "49a187ef2af41225e88f2ff0007ea78a40534a72e74ec93f09d35b5b9232184a"
+  },
+  "upstream_llama_cpp_revision": "cd0a5b6a180dff0048e5fd993098b21c0b2c91b8"
+}

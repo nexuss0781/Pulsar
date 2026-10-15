@@ -60,6 +60,10 @@ struct GenerationResult {
     std::size_t draft_proposals = 0;
     std::size_t accepted_proposals = 0;
     std::size_t rejected_blocks = 0;
+    std::size_t candidate_tree_pulses = 0;
+    std::size_t candidate_tree_nodes = 0;
+    double candidate_tree_build_ms = 0.0;
+    double candidate_tree_verification_ms = 0.0;
     std::string text;
     FinishReason finish_reason = FinishReason::max_tokens;
     double elapsed_ms = 0.0;

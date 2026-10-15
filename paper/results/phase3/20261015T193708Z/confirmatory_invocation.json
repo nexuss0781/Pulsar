@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "python3",
+    "cpp/production/benchmark/run_phase3.py",
+    "--phase",
+    "confirmatory",
+    "--run-dir",
+    "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z"
+  ],
+  "attempt": 2,
+  "phase": "confirmatory",
+  "purpose": "use manifest split=heldout for confirmatory execution; tuning freeze unchanged",
+  "runner_sha256": "393345d47690c03dc63a7c9bb5b8003a24dbce0efa7d21ea75890a1ff5de6923",
+  "started_at_utc": "2026-10-15T19:41:27+00:00"
+}

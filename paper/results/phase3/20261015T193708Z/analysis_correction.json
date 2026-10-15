@@ -1,0 +1,40 @@
+{
+  "analysis_runner_sha256": "a367e08c1d9507ec77bbecc93c6093943848f79f00035c47e349e8265848574b",
+  "corrected_paired_cluster_key": "(seed_root, tuple(batch_prompt_ids))",
+  "created_at_utc": "2026-10-15T19:51:43+00:00",
+  "expected_matched_groups": {
+    "batch_size_1": 40,
+    "batch_size_2": 20
+  },
+  "original_report_and_analysis": {
+    "PHASE3_REPORT.md": {
+      "archived_path": "attempt_failures/analysis_batch_index_pairing_bug/PHASE3_REPORT.md",
+      "sha256": "98c6cece8e0fb404e2caa731b657cb49978d15a3e9770c03d408537194914e81"
+    },
+    "confirmatory_analysis.json": {
+      "archived_path": "attempt_failures/analysis_batch_index_pairing_bug/confirmatory_analysis.json",
+      "sha256": "39a6cceb57bcaf9530c8c255591ffdb72ab9fecd4d0e5902da4ffae3d2e2bcab"
+    }
+  },
+  "protocol_basis": "The frozen protocol predeclares pairing on the same seed root and prompt group.",
+  "raw_file_sha256": {
+    "confirmatory/raw/confirmatory_llama-draft-simple_n2_b1.jsonl": "8cbfb084fd6c021a7133df032ce54b1214acd14952e0d26e67535dc37c832435",
+    "confirmatory/raw/confirmatory_llama-draft-simple_n2_b2.jsonl": "44f4f1215ccc0b3d5571450c56fdbd6ff03a1d0b88770740641ee361ff8d2327",
+    "confirmatory/raw/confirmatory_pulsar-ar_b1.jsonl": "a6326abb4582577bdc48375e044916696f2ef07e8e311a3207ed779750b16f97",
+    "confirmatory/raw/confirmatory_pulsar-ar_b2.jsonl": "c9e8e16377887307ef4f520fa77c3ff8ae28c3daf63bb696e2f59c917d3d790d",
+    "confirmatory/raw/confirmatory_pulsar-tree_branching1_depth2_b1.jsonl": "e80ce6e1671e79b728453a13c8d8c20af41a11d77e03d49160127b9a89bd97c8",
+    "confirmatory/raw/confirmatory_pulsar-tree_branching1_depth2_b2.jsonl": "80b57cf5a3927fd130bf6f939383bbab91ea5e2c371ffc815f3b7cad284df9bd"
+  },
+  "raw_observations_modified": false,
+  "reanalysis_command": [
+    "python3",
+    "cpp/production/benchmark/run_phase3.py",
+    "--phase",
+    "analyze",
+    "--run-dir",
+    "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z"
+  ],
+  "reason": "Initial paired analysis keyed on batch_index, but the llama.cpp server wrote a run-global ordinal while native runners used a per-seed ordinal. Only 4 and 2 matching groups were included at batch sizes 1 and 2.",
+  "server_draft_counters": "Retained server timing logs; one excluded warm-up task, exact accepted/generated counts; source log hashes retained in confirmatory_analysis.json.",
+  "server_metrics_endpoint_enabled": false
+}

@@ -1,0 +1,8 @@
+{
+  "elapsed_process_seconds": 13.810639889969025,
+  "model_load_ms": 234.079,
+  "outputs_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/outputs/tuning_pulsar-tree_branching1_depth2_b2.jsonl",
+  "peak_rss_bytes_stderr": 77176832,
+  "raw_path": "/workspace/pulsar-phase3/paper/results/phase3/20261015T193708Z/tuning/raw/tuning_pulsar-tree_branching1_depth2_b2.jsonl",
+  "return_code": 0
+}

@@ -31,6 +31,9 @@ public:
 
     std::size_t vocabulary_size() const noexcept override;
     std::size_t max_sequence_count() const noexcept override;
+    // Approximate bytes per cached token for the default F16 K/V cache and
+    // equal K/V head dimensions; returns 0 when the metadata is incompatible.
+    std::size_t kv_cache_bytes_per_token_estimate() const noexcept;
     std::vector<Token> tokenize(const std::string& text) const override;
     std::string token_to_piece(Token token) const override;
     bool is_end_token(Token token) const noexcept override;
