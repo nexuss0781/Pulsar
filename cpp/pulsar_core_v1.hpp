@@ -51,6 +51,36 @@ inline long double total_mass(DistributionView distribution) {
     return sum;
 }
 
+struct DistributionFeatures {
+    double maximum_probability = 0.0;
+    double top_two_margin = 0.0;
+    double normalized_entropy = 0.0;
+};
+
+inline DistributionFeatures features(DistributionView distribution) {
+    const long double mass = total_mass(distribution);
+    double maximum = 0.0;
+    double second = 0.0;
+    long double entropy = 0.0L;
+    for (std::size_t i = 0; i < distribution.size; ++i) {
+        const double probability = static_cast<double>(
+            static_cast<long double>(distribution.data[i]) / mass);
+        if (probability > maximum) {
+            second = maximum;
+            maximum = probability;
+        } else if (probability > second) {
+            second = probability;
+        }
+        if (probability > 0.0) {
+            entropy -= static_cast<long double>(probability) * std::log(probability);
+        }
+    }
+    const double normalizer = distribution.size > 1
+        ? std::log(static_cast<double>(distribution.size)) : 1.0;
+    return {maximum, maximum - second,
+            distribution.size > 1 ? static_cast<double>(entropy) / normalizer : 0.0};
+}
+
 template <class URBG>
 inline Token draw(DistributionView distribution, URBG& rng) {
     std::discrete_distribution<Token> categorical(

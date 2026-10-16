@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <iostream>
 #include <limits>
+#include <map>
 #include <random>
 #include <stdexcept>
 #include <string>
@@ -470,6 +471,84 @@ void test_candidate_tree_batch_isolation_and_capacity() {
     }, "candidate tree exceeded backend sequence capacity without failing");
 }
 
+void test_adaptive_components_and_exactness() {
+    using namespace pulsar::runtime;
+    ConfidenceCalibrator calibrator;
+    for (std::size_t batch_size : {1U, 2U}) {
+        for (std::size_t branching : {1U, 2U}) {
+            for (std::size_t depth : {1U, 2U}) {
+                LogisticCalibrationCell cell;
+                cell.observations = 8;
+                cell.means = {{0.5, 0.25, 0.4}};
+                cell.scales = {{1.0, 1.0, 1.0}};
+                cell.coefficients = {{0.0, 0.0, 0.0, 0.0}};
+                calibrator.add_cell(CalibrationCellKey{
+                    batch_size, branching, depth, "continued"}, cell);
+            }
+        }
+    }
+    const CandidateFeatures features{0.7, 0.4, 0.3};
+    require(std::abs(calibrator.predict("continued", 1, 2, 1, features) - 0.5) < 1e-12,
+            "zero-logit calibration model did not return probability 0.5");
+
+    EmaState ema;
+    ema.update(true, 0.20);
+    ema.update(false, 0.20);
+    require(ema.initialized && ema.updates == 2 && std::abs(ema.value - 0.8) < 1e-12,
+            "EMA initialization or smoothing update is incorrect");
+
+    std::map<ActionCostKey, double> costs;
+    for (std::size_t batch_size : {1U, 2U}) {
+        for (const TreeSchedule action : {TreeSchedule{1, 2}, TreeSchedule{2, 2},
+                                          TreeSchedule{2, 3}}) {
+            costs.emplace(ActionCostKey{batch_size, action.branching, action.depth}, 1.0);
+        }
+    }
+    AdaptiveTreeScheduler scheduler(calibrator, costs);
+    const TreeSchedule chosen = scheduler.choose(77, 1, features, 8, 8);
+    require(chosen.branching == 2 && chosen.depth == 3,
+            "scheduler did not choose the highest expected tokens-per-cost legal action");
+    RuntimeTreeObservation event;
+    event.request_id = 77;
+    event.batch_size = 1;
+    event.branching = 2;
+    event.depth = 0;
+    event.continuation_label_available = true;
+    event.continued = true;
+    scheduler.observe(event);
+    require(scheduler.update_count(77, 1, 2, 1) == 1,
+            "scheduler EMA did not receive a verifier-derived continuation label");
+    event.continuation_label_available = false;
+    scheduler.observe(event);
+    require(scheduler.update_count(77, 1, 2, 1) == 1,
+            "scheduler updated EMA when no continuation label was available");
+    scheduler.reset();
+    require(scheduler.update_count(77, 1, 2, 1) == 0,
+            "scheduler reset did not clear request-local EMA state");
+
+    GenerationOptions options;
+    options.max_new_tokens = 3;
+    options.max_context_tokens = 16;
+    options.batch_size = 1;
+    options.seed = 91;
+    options.sampling.temperature = 0.0;
+    options.sampling.top_k = 0;
+    options.sampling.top_p = 1.0;
+    FakeModel autoregressive;
+    const auto reference = generate_batch(autoregressive, {"A"}, options);
+    FakeModel target;
+    FakeModel draft(1);
+    std::vector<RuntimeTreeObservation> observations;
+    const auto adaptive = generate_candidate_tree_batch(
+        target, draft, {"A"}, options, 2, 3, 0, &scheduler, &observations);
+    require(adaptive.size() == 1 && adaptive[0].text == reference[0].text &&
+                adaptive[0].generated_tokens == reference[0].generated_tokens,
+            "adaptive scheduling changed the exact greedy target output");
+    require(!observations.empty() && observations.front().depth == 0 &&
+                observations.front().continuation_label_available,
+            "adaptive runtime did not capture verifier labels and candidate features");
+}
+
 }  // namespace
 
 int main() {
@@ -486,7 +565,8 @@ int main() {
         test_candidate_tree_terminal_token_stops();
         test_candidate_tree_runtime_commit_and_rollback();
         test_candidate_tree_batch_isolation_and_capacity();
-        std::cout << "Pulsar production runtime tests: PASS (12 groups)\n";
+        test_adaptive_components_and_exactness();
+        std::cout << "Pulsar production runtime tests: PASS (13 groups)\n";
         return 0;
     } catch (const std::exception& error) {
         std::cerr << "Pulsar production runtime tests: FAIL: " << error.what() << '\n';

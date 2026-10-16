@@ -1,0 +1,226 @@
+{
+  "action_costs_path": "paper/results/phase4/20261015T202100Z/tuning/action_costs.tsv",
+  "by_batch_size": {
+    "1": {
+      "autoregressive_raw": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_autoregressive_b1.jsonl",
+      "fixed_tree_candidates": [
+        {
+          "branching": 1,
+          "depth": 2,
+          "median_generation_ms_per_pulse": 29.055636777777778,
+          "node_bound": 2,
+          "path": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_pulsar-tree_B1_D2_b1.jsonl",
+          "score": 52.8815852
+        },
+        {
+          "branching": 2,
+          "depth": 2,
+          "median_generation_ms_per_pulse": 40.478604314024395,
+          "node_bound": 3,
+          "path": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_pulsar-tree_B2_D2_b1.jsonl",
+          "score": 40.40063365
+        },
+        {
+          "branching": 2,
+          "depth": 3,
+          "median_generation_ms_per_pulse": 67.9389144578853,
+          "node_bound": 7,
+          "path": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_pulsar-tree_B2_D3_b1.jsonl",
+          "score": 29.3106944
+        }
+      ],
+      "llama_cpp": {
+        "median_tokens_per_second": 119.71103149927865,
+        "n_max": 2,
+        "raw": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_llama_draft_simple_n2_b1.jsonl"
+      },
+      "pulsar_fixed_tree": {
+        "branching": 1,
+        "depth": 2,
+        "median_tokens_per_second": 52.8815852,
+        "node_bound": 2,
+        "raw": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_pulsar-tree_B1_D2_b1.jsonl"
+      }
+    },
+    "2": {
+      "autoregressive_raw": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_autoregressive_b2.jsonl",
+      "fixed_tree_candidates": [
+        {
+          "branching": 1,
+          "depth": 2,
+          "median_generation_ms_per_pulse": 26.67438278659612,
+          "node_bound": 2,
+          "path": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_pulsar-tree_B1_D2_b2.jsonl",
+          "score": 57.30555965
+        },
+        {
+          "branching": 2,
+          "depth": 2,
+          "median_generation_ms_per_pulse": 34.910804513449364,
+          "node_bound": 3,
+          "path": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_pulsar-tree_B2_D2_b2.jsonl",
+          "score": 45.99749965
+        },
+        {
+          "branching": 2,
+          "depth": 3,
+          "median_generation_ms_per_pulse": 69.86221596270397,
+          "node_bound": 7,
+          "path": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_pulsar-tree_B2_D3_b2.jsonl",
+          "score": 29.1877846
+        }
+      ],
+      "llama_cpp": {
+        "median_tokens_per_second": 155.75927935739918,
+        "n_max": 2,
+        "raw": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_llama_draft_simple_n2_b2.jsonl"
+      },
+      "pulsar_fixed_tree": {
+        "branching": 1,
+        "depth": 2,
+        "median_tokens_per_second": 57.30555965,
+        "node_bound": 2,
+        "raw": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_pulsar-tree_B1_D2_b2.jsonl"
+      }
+    }
+  },
+  "candidate_scores": [
+    {
+      "batch_size": 1,
+      "configuration": {},
+      "median_tokens_per_second": 198.71346,
+      "method": "autoregressive",
+      "raw_path": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_autoregressive_b1.jsonl"
+    },
+    {
+      "batch_size": 1,
+      "configuration": {
+        "n_max": 2
+      },
+      "median_tokens_per_second": 119.71103149927865,
+      "method": "llama.cpp-draft-simple",
+      "raw_path": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_llama_draft_simple_n2_b1.jsonl"
+    },
+    {
+      "batch_size": 1,
+      "configuration": {
+        "n_max": 4
+      },
+      "median_tokens_per_second": 93.62886322173969,
+      "method": "llama.cpp-draft-simple",
+      "raw_path": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_llama_draft_simple_n4_b1.jsonl"
+    },
+    {
+      "batch_size": 1,
+      "configuration": {
+        "n_max": 6
+      },
+      "median_tokens_per_second": 70.22983319247244,
+      "method": "llama.cpp-draft-simple",
+      "raw_path": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_llama_draft_simple_n6_b1.jsonl"
+    },
+    {
+      "batch_size": 1,
+      "configuration": {
+        "branching": 1,
+        "depth": 2
+      },
+      "median_generation_ms_per_pulse": 29.055636777777778,
+      "median_tokens_per_second": 52.8815852,
+      "method": "pulsar-fixed-tree",
+      "raw_path": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_pulsar-tree_B1_D2_b1.jsonl"
+    },
+    {
+      "batch_size": 1,
+      "configuration": {
+        "branching": 2,
+        "depth": 2
+      },
+      "median_generation_ms_per_pulse": 40.478604314024395,
+      "median_tokens_per_second": 40.40063365,
+      "method": "pulsar-fixed-tree",
+      "raw_path": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_pulsar-tree_B2_D2_b1.jsonl"
+    },
+    {
+      "batch_size": 1,
+      "configuration": {
+        "branching": 2,
+        "depth": 3
+      },
+      "median_generation_ms_per_pulse": 67.9389144578853,
+      "median_tokens_per_second": 29.3106944,
+      "method": "pulsar-fixed-tree",
+      "raw_path": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_pulsar-tree_B2_D3_b1.jsonl"
+    },
+    {
+      "batch_size": 2,
+      "configuration": {},
+      "median_tokens_per_second": 244.6282205,
+      "method": "autoregressive",
+      "raw_path": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_autoregressive_b2.jsonl"
+    },
+    {
+      "batch_size": 2,
+      "configuration": {
+        "n_max": 2
+      },
+      "median_tokens_per_second": 155.75927935739918,
+      "method": "llama.cpp-draft-simple",
+      "raw_path": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_llama_draft_simple_n2_b2.jsonl"
+    },
+    {
+      "batch_size": 2,
+      "configuration": {
+        "n_max": 4
+      },
+      "median_tokens_per_second": 126.45806668483644,
+      "method": "llama.cpp-draft-simple",
+      "raw_path": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_llama_draft_simple_n4_b2.jsonl"
+    },
+    {
+      "batch_size": 2,
+      "configuration": {
+        "n_max": 6
+      },
+      "median_tokens_per_second": 96.70176722719341,
+      "method": "llama.cpp-draft-simple",
+      "raw_path": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_llama_draft_simple_n6_b2.jsonl"
+    },
+    {
+      "batch_size": 2,
+      "configuration": {
+        "branching": 1,
+        "depth": 2
+      },
+      "median_generation_ms_per_pulse": 26.67438278659612,
+      "median_tokens_per_second": 57.30555965,
+      "method": "pulsar-fixed-tree",
+      "raw_path": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_pulsar-tree_B1_D2_b2.jsonl"
+    },
+    {
+      "batch_size": 2,
+      "configuration": {
+        "branching": 2,
+        "depth": 2
+      },
+      "median_generation_ms_per_pulse": 34.910804513449364,
+      "median_tokens_per_second": 45.99749965,
+      "method": "pulsar-fixed-tree",
+      "raw_path": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_pulsar-tree_B2_D2_b2.jsonl"
+    },
+    {
+      "batch_size": 2,
+      "configuration": {
+        "branching": 2,
+        "depth": 3
+      },
+      "median_generation_ms_per_pulse": 69.86221596270397,
+      "median_tokens_per_second": 29.1877846,
+      "method": "pulsar-fixed-tree",
+      "raw_path": "paper/results/phase4/20261015T202100Z/tuning/raw/tuning_pulsar-tree_B2_D3_b2.jsonl"
+    }
+  ],
+  "selection_rule": "maximum median batch tokens/s over tuning batches; ties prefer fewer actual tree nodes, then smaller n_max",
+  "tuning_runner_sha256": "bfc24430d552282571a7bf02872a2057191035c6ccdbcb2bb44dfa90144040b3",
+  "tuning_runner_snapshot": "paper/results/phase4/20261015T202100Z/tuning/run_phase4_used_for_tuning.py"
+}
