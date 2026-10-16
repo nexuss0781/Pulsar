@@ -1,5 +1,15 @@
 cmake_minimum_required(VERSION 3.20)
 project(PulsarProductionRuntime VERSION 0.1.0 LANGUAGES CXX)
+include(CMakePackageConfigHelpers)
+set(PULSAR_INSTALL_CMAKEDIR "lib/cmake/PulsarRuntime")
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/PulsarRuntimeConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/PulsarRuntimeConfig.cmake"
+    INSTALL_DESTINATION "${PULSAR_INSTALL_CMAKEDIR}")
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/PulsarRuntimeConfigVersion.cmake"
+    VERSION "${PROJECT_VERSION}"
+    COMPATIBILITY SameMajorVersion)
 
 option(PULSAR_BUILD_LLAMA_BACKEND "Build the GGUF-backed llama.cpp executable" ON)
 option(PULSAR_FETCH_LLAMA_CPP "Fetch the pinned llama.cpp source when no local source tree is supplied" ON)
@@ -33,6 +43,15 @@ if(BUILD_TESTING)
     endif()
     add_test(NAME pulsar_runtime_tests COMMAND pulsar_runtime_tests)
     add_test(NAME pulsar_tree_v3_tests COMMAND pulsar_tree_v3_tests)
+    if(NOT CMAKE_CROSSCOMPILING)
+        add_test(NAME pulsar_install_consumer
+            COMMAND ${CMAKE_COMMAND}
+                "-DBUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}"
+                "-DPREFIX=${CMAKE_CURRENT_BINARY_DIR}/phase5-install"
+                "-DWORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/phase5-consumer"
+                "-DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/tests"
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/verify_install.cmake")
+    endif()
 endif()
 
 if(PULSAR_BUILD_LLAMA_BACKEND)
@@ -126,4 +145,8 @@ install(FILES
 install(EXPORT PulsarRuntimeTargets
     FILE PulsarRuntimeTargets.cmake
     NAMESPACE Pulsar::
-    DESTINATION lib/cmake/PulsarRuntime)
+    DESTINATION "${PULSAR_INSTALL_CMAKEDIR}")
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/PulsarRuntimeConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/PulsarRuntimeConfigVersion.cmake"
+    DESTINATION "${PULSAR_INSTALL_CMAKEDIR}")

@@ -212,7 +212,19 @@ inline std::vector<GenerationResult> generate_candidate_tree_batch(
     std::vector<bool> finished(prompts.size(), false);
     std::size_t active_count = prompts.size();
     while (active_count != 0) {
+        if (is_cancellation_requested(options)) {
+            const double elapsed = std::chrono::duration<double, std::milli>(
+                std::chrono::steady_clock::now() - started).count();
+            mark_unfinished_cancelled(results, finished, active_count, elapsed);
+            break;
+        }
         for (std::size_t request = 0; request < prompts.size(); ++request) {
+            if (is_cancellation_requested(options)) {
+                const double elapsed = std::chrono::duration<double, std::milli>(
+                    std::chrono::steady_clock::now() - started).count();
+                mark_unfinished_cancelled(results, finished, active_count, elapsed);
+                break;
+            }
             if (finished[request]) {
                 continue;
             }

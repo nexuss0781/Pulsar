@@ -40,7 +40,8 @@ void require_throws(Fn&& fn, const std::string& message) {
 
 class FakeModel final : public pulsar::runtime::Model {
 public:
-    explicit FakeModel(int root_override = -1) : root_override_(root_override) {}
+    explicit FakeModel(int root_override = -1, bool never_end = false)
+        : root_override_(root_override), never_end_(never_end) {}
 
     std::size_t vocabulary_size() const noexcept override { return 4; }
     std::size_t max_sequence_count() const noexcept override { return 256; }
@@ -49,6 +50,9 @@ public:
         if (text == "A") return {0};
         if (text == "B") return {2};
         if (text == "AB") return {0, 2};
+        if (!text.empty() && text.front() == '#') {
+            return std::vector<pulsar::runtime::Token>(text.size(), 0);
+        }
         return {0};
     }
 
@@ -84,6 +88,18 @@ public:
     void decode_batch(const std::vector<pulsar::runtime::SequenceInput>& inputs,
                       std::vector<std::vector<float>>& next_logits) override {
         next_logits.clear();
+        if (fail_after_one_decode) {
+            fail_after_one_decode = false;
+            if (!inputs.empty()) {
+                const auto& input = inputs.front();
+                require(input.sequence_id < histories.size(),
+                        "fake partial failure sequence has no KV state");
+                require(input.position == histories[input.sequence_id].size(),
+                        "fake partial failure position is stale");
+                histories[input.sequence_id].push_back(input.token);
+            }
+            throw std::runtime_error("injected backend failure after partial KV mutation");
+        }
         for (const auto& input : inputs) {
             require(input.sequence_id < max_sequence_count(), "fake sequence ID out of range");
             require(input.sequence_id < histories.size(), "fake sequence has no copied or prefetched KV state");
@@ -121,6 +137,7 @@ public:
     std::size_t decode_batch_count = 0;
     std::size_t copy_count = 0;
     std::size_t rollback_count = 0;
+    bool fail_after_one_decode = false;
 
 private:
     std::vector<float> row_for(const std::vector<pulsar::runtime::Token>& history) const {
@@ -131,12 +148,16 @@ private:
         }
         const auto last = history.back();
         if (last == 0) return {0.0F, 4.0F, 1.0F, -9.0F};
-        if (last == 1) return {-9.0F, -8.0F, -7.0F, 6.0F};
+        if (last == 1) {
+            return never_end_ ? std::vector<float>{0.0F, 4.0F, 1.0F, -9.0F}
+                              : std::vector<float>{-9.0F, -8.0F, -7.0F, 6.0F};
+        }
         if (last == 2) return {4.0F, 0.0F, 1.0F, -9.0F};
         return {0.0F, 0.0F, 0.0F, 5.0F};
     }
 
     int root_override_;
+    bool never_end_;
     std::vector<std::vector<pulsar::runtime::Token>> histories;
 };
 
@@ -549,6 +570,116 @@ void test_adaptive_components_and_exactness() {
             "adaptive runtime did not capture verifier labels and candidate features");
 }
 
+void test_long_context_large_batch_and_warm_runs() {
+    using namespace pulsar::runtime;
+    GenerationOptions options;
+    options.max_new_tokens = 2;
+    options.max_context_tokens = 4096;
+    options.batch_size = 128;
+    options.seed = 20261016;
+    options.sampling.temperature = 0.0;
+    options.sampling.top_k = 0;
+    options.sampling.top_p = 1.0;
+    const std::vector<std::string> prompts(128, "A");
+    FakeModel model;
+    std::vector<GenerationResult> reference;
+    for (int repetition = 0; repetition < 5; ++repetition) {
+        const auto results = generate_batch(model, prompts, options, 500);
+        require(results.size() == prompts.size(), "large batch result count mismatch");
+        for (const auto& result : results) {
+            require(result.text == "b" && result.generated_tokens == 2 &&
+                        result.finish_reason == FinishReason::end_of_generation,
+                    "large batch result or request isolation mismatch");
+        }
+        if (repetition == 0) reference = results;
+        else {
+            for (std::size_t i = 0; i < results.size(); ++i) {
+                require(results[i].text == reference[i].text &&
+                            results[i].generated_tokens == reference[i].generated_tokens,
+                        "repeated warm run changed fixed-seed results");
+            }
+        }
+    }
+
+    options.batch_size = 1;
+    options.max_context_tokens = 2048;
+    options.max_new_tokens = 4;
+    FakeModel long_context_model;
+    const std::string long_prompt = "#" + std::string(2047, 'x');
+    const auto long_result = generate_batch(long_context_model, {long_prompt}, options);
+    require(long_result.size() == 1 && long_result[0].prompt_tokens == 2048 &&
+                long_result[0].generated_tokens == 1 &&
+                long_result[0].finish_reason == FinishReason::context_limit,
+            "long context did not stop at the configured context boundary");
+}
+
+void test_cooperative_cancellation_and_branch_cleanup() {
+    using namespace pulsar::runtime;
+    GenerationOptions options;
+    options.max_new_tokens = 12;
+    options.max_context_tokens = 32;
+    options.batch_size = 2;
+    options.seed = 303;
+    options.sampling.temperature = 0.0;
+    options.sampling.top_k = 0;
+    options.sampling.top_p = 1.0;
+
+    FakeModel autoregressive(-1, true);
+    options.cancellation_requested = [&] { return autoregressive.decode_batch_count != 0; };
+    const auto ar = generate_batch(autoregressive, {"A", "B"}, options);
+    require(ar.size() == 2 && ar[0].generated_tokens == 1 &&
+                ar[1].generated_tokens == 1 &&
+                ar[0].finish_reason == FinishReason::cancelled &&
+                ar[1].finish_reason == FinishReason::cancelled,
+            "autoregressive cancellation did not return partial batch results");
+
+    options.batch_size = 1;
+    FakeModel chain_target(-1, true);
+    FakeModel chain_draft(-1, true);
+    options.cancellation_requested = [&] {
+        return chain_target.decode_batch_count != 0 && chain_draft.decode_batch_count != 0;
+    };
+    const auto chain = generate_speculative_batch(
+        chain_target, chain_draft, {"A"}, options, 2);
+    require(chain.size() == 1 && chain[0].generated_tokens > 0 &&
+                chain[0].finish_reason == FinishReason::cancelled,
+            "speculative cancellation did not stop at a verified block boundary");
+
+    FakeModel tree_target(-1, true);
+    FakeModel tree_draft(-1, true);
+    options.cancellation_requested = [&] {
+        return tree_target.decode_batch_count != 0 && tree_draft.decode_batch_count != 0;
+    };
+    const auto tree = generate_candidate_tree_batch(
+        tree_target, tree_draft, {"A"}, options, 1, 2);
+    require(tree.size() == 1 && tree[0].generated_tokens > 0 &&
+                tree[0].finish_reason == FinishReason::cancelled,
+            "candidate-tree cancellation did not stop after a complete pulse");
+    require(tree_target.sequence_history(1).empty() &&
+                tree_draft.sequence_history(1).empty(),
+            "candidate-tree cancellation left scratch branch KV state behind");
+}
+
+void test_recovery_after_partial_backend_failure() {
+    using namespace pulsar::runtime;
+    GenerationOptions options;
+    options.max_new_tokens = 2;
+    options.max_context_tokens = 16;
+    options.batch_size = 1;
+    options.sampling.temperature = 0.0;
+    options.sampling.top_k = 0;
+    options.sampling.top_p = 1.0;
+    FakeModel model(-1, true);
+    model.fail_after_one_decode = true;
+    require_throws([&] { (void)generate_batch(model, {"A"}, options); },
+                   "injected partial backend failure should propagate");
+    const auto recovered = generate_batch(model, {"A"}, options);
+    require(recovered.size() == 1 && recovered[0].text == "bb" &&
+                recovered[0].generated_tokens == 2 && model.reset_count == 2,
+            "a new generation did not recover from partial KV mutation by resetting state");
+}
+
+
 }  // namespace
 
 int main() {
@@ -566,7 +697,10 @@ int main() {
         test_candidate_tree_runtime_commit_and_rollback();
         test_candidate_tree_batch_isolation_and_capacity();
         test_adaptive_components_and_exactness();
-        std::cout << "Pulsar production runtime tests: PASS (13 groups)\n";
+        test_long_context_large_batch_and_warm_runs();
+        test_cooperative_cancellation_and_branch_cleanup();
+        test_recovery_after_partial_backend_failure();
+        std::cout << "Pulsar production runtime tests: PASS (16 groups)\n";
         return 0;
     } catch (const std::exception& error) {
         std::cerr << "Pulsar production runtime tests: FAIL: " << error.what() << '\n';

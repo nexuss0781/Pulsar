@@ -1,0 +1,6 @@
+/dev/shm/pulsar-phase5-arm-install/bin/pulsar-generate: ELF 64-bit LSB pie executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, BuildID[sha1]=a097393b908e16502e5c84ea9a22ca948802d09b, for GNU/Linux 3.7.0, not stripped
+  Class:                             ELF64
+  Machine:                           AArch64
+downstream_consumer_qemu_exit=0
+{"id":0,"mode":"autoregressive","prompt_tokens":11,"completion_tokens":4,"draft_proposals":0,"accepted_proposals":0,"rejected_blocks":0,"proposal_acceptance_rate":0,"finish_reason":"max_tokens","elapsed_ms":860.304,"tokens_per_second":4.650,"text":" A little girl named"}
+installed_cli_qemu_inference=PASS

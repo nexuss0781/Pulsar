@@ -1,0 +1,4 @@
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/PulsarRuntimeTargets.cmake")
+check_required_components(PulsarRuntime)

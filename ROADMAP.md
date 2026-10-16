@@ -54,7 +54,7 @@ Evidence: [`PHASE4_PROTOCOL.md`](cpp/production/benchmark/PHASE4_PROTOCOL.md), [
 
 ## Phase 5 — Production hardening and native architecture validation
 
-Status: not started.
+Status: hardening implementation and validation pass complete; phase exit gate remains open because native ARM64 hardware and the broader model-compatibility/statistical gates are unverified. See [`PHASE5_REPORT.md`](paper/results/phase5/20261016/PHASE5_REPORT.md). Cross-build/QEMU results are labeled separately from native validation.
 
 Run on native Linux x86_64 and ARM64 hardware, not only emulation. Expand tests across model families, longer contexts, malformed inputs/models, resource exhaustion and memory pressure, many-request batches, cancellation/error recovery, repeated warm runs, sanitizer builds, and installation/deployment paths. Document supported llama.cpp revision, GGUF/tokenizer compatibility, sampling processors, CPU feature behavior, thread policy, memory limits, and known exclusions. Add a serving interface only after the batch runtime and measurements justify it.
 
@@ -68,4 +68,4 @@ Only after the inference path has a stable contract, select a specific model-qua
 
 ## Immediate proposal
 
-Phase 4 is complete, but no overall acceleration was established; keep the adaptive policy experimental and the measured autoregressive path as the baseline. Phase 5 remains the next candidate, but this publication contains no Phase 5 implementation. Do not make a general speedup claim; model training/fine-tuning and quantum mechanisms remain out of scope.
+Phase 5 is the currently approved phase. Do not start Phase 6 or model training/fine-tuning. Phase 4 did not establish overall acceleration; do not make a general speedup claim. Quantum mechanisms remain out of scope.
