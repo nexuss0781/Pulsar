@@ -1,0 +1,12 @@
+{
+  "batch_size": 2,
+  "freeze_sha256": "404b8375bc08c560ada0eee4b6a5cba3ec8fd5ae6a2a5e0de17e72dc87d70e69",
+  "order": [
+    "fixed_B2_D3",
+    "adaptive",
+    "fixed_B1_D2",
+    "autoregressive",
+    "builtin",
+    "fixed_B2_D2"
+  ]
+}

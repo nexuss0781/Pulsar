@@ -26,6 +26,15 @@ Phase 2 real-GGUF smoke tests used the same Q2_K model as target and draft, bran
 
 In one matched tiny-model run, autoregressive generation produced 80 tokens in 267.808 ms (about **298.7 aggregate tokens/s**) while Q2-target/Q3-draft speculation produced 80 in 740.499 ms (about **108.0 aggregate tokens/s**). These are single-run smoke observations, not benchmark results; they show no speedup and are not generalized to other models or workloads.
 
+
+## Phase 4 confidence calibration and adaptive scheduling
+
+The Phase 4 implementation and experiment were completed in an isolated workspace before publication. The preregistered CPU-only TinyStories 15M fixture used 24 disjoint topic/context groups (8 calibration, 8 tuning, 8 locked evaluation), two threads, batch sizes 1 and 2, and ten paired evaluation seed roots. The frozen report records that runtime and Python correctness tests passed.
+
+Adaptive versus the tuning-selected fixed tree passed the throughput/p95 gate at batch 1 (throughput ratio 1.049, paired 95% CI 1.031–1.066; p95 latency ratio 0.944, CI 0.930–0.981). Batch 2 was inconclusive (throughput ratio 1.007, CI 0.989–1.024). Adaptive remained substantially slower than autoregressive decoding: 0.322× throughput at batch 1 and 0.274× at batch 2. Thus, **no overall acceleration was established**. The batch-1 scheduler selected only (branching=1, depth=2); at batch 2 it selected that action 92.1% of the time and (2,2) 7.9%. Calibration metrics are descriptive; no uncalibrated Brier comparator was included.
+
+See [`PHASE4_PROTOCOL.md`](benchmark/PHASE4_PROTOCOL.md), [`PHASE4_REPORT.md`](../../paper/results/phase4/20261015T202100Z/PHASE4_REPORT.md), and the selected evidence/hash manifest in `../../paper/results/phase4/20261015T202100Z/`.
+
 ## Source provenance
 
 The backend uses [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp), pinned to commit [`cd0a5b6a180dff0048e5fd993098b21c0b2c91b8`](https://github.com/ggml-org/llama.cpp/tree/cd0a5b6a180dff0048e5fd993098b21c0b2c91b8); the exact dependency record is in [`UPSTREAM.md`](UPSTREAM.md).

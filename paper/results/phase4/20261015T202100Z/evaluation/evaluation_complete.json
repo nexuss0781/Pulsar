@@ -1,0 +1,11 @@
+{
+  "completed_at_utc": "2026-10-15T20:53:15+00:00",
+  "expected_methods_per_batch_size": [
+    "autoregressive",
+    "llama.cpp selected chain",
+    "all three fixed trees",
+    "adaptive"
+  ],
+  "freeze_sha256": "404b8375bc08c560ada0eee4b6a5cba3ec8fd5ae6a2a5e0de17e72dc87d70e69",
+  "methods_complete": true
+}

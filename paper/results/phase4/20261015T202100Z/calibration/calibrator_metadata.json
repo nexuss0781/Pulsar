@@ -1,0 +1,418 @@
+{
+  "calibrator_tsv_sha256": "595b6d247b6318f710fc1e9f258354e604142836bf93d381033fa24eacacde7d",
+  "cells": [
+    {
+      "batch_size": 1,
+      "branching": 1,
+      "coefficients": [
+        1.4636118819973964,
+        0.0648231656030341,
+        0.06203670354732604,
+        -0.06723398617045549
+      ],
+      "depth_position": 1,
+      "means": [
+        0.6258041605168663,
+        0.4762309725085229,
+        0.11228414814457086
+      ],
+      "observations": 1002,
+      "outcome": "accepted",
+      "scales": [
+        0.2695168901475013,
+        0.3497758906505929,
+        0.08426062092042419
+      ]
+    },
+    {
+      "batch_size": 1,
+      "branching": 1,
+      "coefficients": [
+        0.18119810382678522,
+        0.16377524392458598,
+        0.16054767000439166,
+        -0.15940436463586108
+      ],
+      "depth_position": 1,
+      "means": [
+        0.6260313235486789,
+        0.47649096053815043,
+        0.11211771210890244
+      ],
+      "observations": 984,
+      "outcome": "continued",
+      "scales": [
+        0.2698568302739118,
+        0.35047514243932876,
+        0.0843576877605967
+      ]
+    },
+    {
+      "batch_size": 1,
+      "branching": 1,
+      "coefficients": [
+        1.5567343797745594,
+        0.01028771433771125,
+        0.011280750159084058,
+        -0.008783881760503863
+      ],
+      "depth_position": 2,
+      "means": [
+        0.7638508636666667,
+        0.6511904935701311,
+        0.0703162893806367
+      ],
+      "observations": 534,
+      "outcome": "accepted",
+      "scales": [
+        0.23695798689661107,
+        0.33183938975631,
+        0.07067366767367628
+      ]
+    },
+    {
+      "batch_size": 1,
+      "branching": 2,
+      "coefficients": [
+        1.522800542502347,
+        0.061737546828394926,
+        0.057044902383482164,
+        -0.06529198058779234
+      ],
+      "depth_position": 1,
+      "means": [
+        0.6400483388794802,
+        0.49326997591714916,
+        0.10790760177945281
+      ],
+      "observations": 731,
+      "outcome": "accepted",
+      "scales": [
+        0.2684648095090215,
+        0.3494482355522093,
+        0.08337589782111486
+      ]
+    },
+    {
+      "batch_size": 1,
+      "branching": 2,
+      "coefficients": [
+        0.7277009725787886,
+        0.1314945619226315,
+        0.11627418119579722,
+        -0.14067673429862912
+      ],
+      "depth_position": 1,
+      "means": [
+        0.6409278764699583,
+        0.4940620219549875,
+        0.10752365819232268
+      ],
+      "observations": 719,
+      "outcome": "continued",
+      "scales": [
+        0.26880539230211603,
+        0.3503939617914569,
+        0.08345890242311658
+      ]
+    },
+    {
+      "batch_size": 1,
+      "branching": 2,
+      "coefficients": [
+        1.5266050240953095,
+        0.027823040527353456,
+        0.02277607437493747,
+        -0.031220181226385906
+      ],
+      "depth_position": 2,
+      "means": [
+        0.7269067653534304,
+        0.5964890180457506,
+        0.07993283783987526
+      ],
+      "observations": 481,
+      "outcome": "accepted",
+      "scales": [
+        0.2489752216027176,
+        0.34433001876381014,
+        0.07384124134745791
+      ]
+    },
+    {
+      "batch_size": 1,
+      "branching": 2,
+      "coefficients": [
+        0.7717778977071632,
+        0.03345798644769642,
+        0.024688974500870958,
+        -0.0398151128001723
+      ],
+      "depth_position": 2,
+      "means": [
+        0.7260478254345991,
+        0.5950911044791266,
+        0.0801557689121941
+      ],
+      "observations": 474,
+      "outcome": "continued",
+      "scales": [
+        0.2490699258309642,
+        0.3445865604377931,
+        0.0740088643514418
+      ]
+    },
+    {
+      "batch_size": 1,
+      "branching": 2,
+      "coefficients": [
+        1.3836882172438951,
+        -0.024523339250770028,
+        -0.024488030295961572,
+        0.016899227283680887
+      ],
+      "depth_position": 3,
+      "means": [
+        0.7458257939938271,
+        0.6176629474719012,
+        0.07363473345342593
+      ],
+      "observations": 324,
+      "outcome": "accepted",
+      "scales": [
+        0.24073776425349575,
+        0.33897082059715045,
+        0.07058727375757122
+      ]
+    },
+    {
+      "batch_size": 2,
+      "branching": 1,
+      "coefficients": [
+        1.4636118819973964,
+        0.06482316560303406,
+        0.062036703547326065,
+        -0.0672339861704556
+      ],
+      "depth_position": 1,
+      "means": [
+        0.6258041605168663,
+        0.4762309725085229,
+        0.11228414814457086
+      ],
+      "observations": 1002,
+      "outcome": "accepted",
+      "scales": [
+        0.2695168901475013,
+        0.3497758906505929,
+        0.08426062092042419
+      ]
+    },
+    {
+      "batch_size": 2,
+      "branching": 1,
+      "coefficients": [
+        0.18119810382678533,
+        0.163775243924586,
+        0.1605476700043916,
+        -0.1594043646358611
+      ],
+      "depth_position": 1,
+      "means": [
+        0.6260313235486789,
+        0.47649096053815043,
+        0.11211771210890244
+      ],
+      "observations": 984,
+      "outcome": "continued",
+      "scales": [
+        0.2698568302739118,
+        0.35047514243932876,
+        0.0843576877605967
+      ]
+    },
+    {
+      "batch_size": 2,
+      "branching": 1,
+      "coefficients": [
+        1.5567343797745594,
+        0.01028771433771125,
+        0.011280750159084023,
+        -0.008783881760503858
+      ],
+      "depth_position": 2,
+      "means": [
+        0.7638508636666667,
+        0.6511904935701311,
+        0.0703162893806367
+      ],
+      "observations": 534,
+      "outcome": "accepted",
+      "scales": [
+        0.23695798689661107,
+        0.33183938975631,
+        0.07067366767367628
+      ]
+    },
+    {
+      "batch_size": 2,
+      "branching": 2,
+      "coefficients": [
+        1.522800542502347,
+        0.061737546828394954,
+        0.05704490238348216,
+        -0.0652919805877924
+      ],
+      "depth_position": 1,
+      "means": [
+        0.6400483388794802,
+        0.49326997591714916,
+        0.10790760177945281
+      ],
+      "observations": 731,
+      "outcome": "accepted",
+      "scales": [
+        0.2684648095090215,
+        0.3494482355522093,
+        0.08337589782111486
+      ]
+    },
+    {
+      "batch_size": 2,
+      "branching": 2,
+      "coefficients": [
+        0.7277009725787886,
+        0.13149456192263148,
+        0.11627418119579727,
+        -0.14067673429862912
+      ],
+      "depth_position": 1,
+      "means": [
+        0.6409278764699583,
+        0.4940620219549875,
+        0.10752365819232268
+      ],
+      "observations": 719,
+      "outcome": "continued",
+      "scales": [
+        0.26880539230211603,
+        0.3503939617914569,
+        0.08345890242311658
+      ]
+    },
+    {
+      "batch_size": 2,
+      "branching": 2,
+      "coefficients": [
+        1.5266050240953095,
+        0.02782304052735344,
+        0.022776074374937495,
+        -0.03122018122638589
+      ],
+      "depth_position": 2,
+      "means": [
+        0.7269067653534304,
+        0.5964890180457506,
+        0.07993283783987526
+      ],
+      "observations": 481,
+      "outcome": "accepted",
+      "scales": [
+        0.2489752216027176,
+        0.34433001876381014,
+        0.07384124134745791
+      ]
+    },
+    {
+      "batch_size": 2,
+      "branching": 2,
+      "coefficients": [
+        0.7717778977071632,
+        0.0334579864476964,
+        0.02468897450087098,
+        -0.039815112800172296
+      ],
+      "depth_position": 2,
+      "means": [
+        0.7260478254345991,
+        0.5950911044791266,
+        0.0801557689121941
+      ],
+      "observations": 474,
+      "outcome": "continued",
+      "scales": [
+        0.2490699258309642,
+        0.3445865604377931,
+        0.0740088643514418
+      ]
+    },
+    {
+      "batch_size": 2,
+      "branching": 2,
+      "coefficients": [
+        1.3836882172438953,
+        -0.024523339250770035,
+        -0.0244880302959616,
+        0.016899227283680894
+      ],
+      "depth_position": 3,
+      "means": [
+        0.7458257939938271,
+        0.6176629474719012,
+        0.07363473345342593
+      ],
+      "observations": 324,
+      "outcome": "accepted",
+      "scales": [
+        0.24073776425349575,
+        0.33897082059715045,
+        0.07058727375757122
+      ]
+    }
+  ],
+  "configured_depth_selection": "for each branching factor, use only its largest predeclared tree depth to avoid duplicate calibration observations from overlapping action configs",
+  "feature_order": [
+    "root_q_max",
+    "root_q_margin",
+    "root_q_entropy"
+  ],
+  "feature_scale_floor": 1e-06,
+  "fitted_at_utc": "2026-10-15T20:24:41+00:00",
+  "input_hashes": [
+    {
+      "path": "paper/results/phase4/20261015T202100Z/calibration/observations/calibration_pulsar-tree_B1_D2_b1.jsonl",
+      "sha256": "e769888bdad6fadfb26fc739b59ba27c58f29253b899eb4c71f120549cb3574b"
+    },
+    {
+      "path": "paper/results/phase4/20261015T202100Z/calibration/observations/calibration_pulsar-tree_B1_D2_b2.jsonl",
+      "sha256": "b033eb2801b566109a4ad5c2440b59812e9c708cd0d801e1647bf5eb39845226"
+    },
+    {
+      "path": "paper/results/phase4/20261015T202100Z/calibration/observations/calibration_pulsar-tree_B2_D2_b1.jsonl",
+      "sha256": "bc47a06da63880d387d7daea0eb0862a8a9185717cad4c5b4fa7c503b9d7db5a"
+    },
+    {
+      "path": "paper/results/phase4/20261015T202100Z/calibration/observations/calibration_pulsar-tree_B2_D2_b2.jsonl",
+      "sha256": "580bd38874b9d49485a6a273673e92b4e45a6312a431cb6ad14b35aed3638abc"
+    },
+    {
+      "path": "paper/results/phase4/20261015T202100Z/calibration/observations/calibration_pulsar-tree_B2_D3_b1.jsonl",
+      "sha256": "df7ef9730027ebcf2f72e917116a9bc33413b50ed30b533c138c09edeee11a99"
+    },
+    {
+      "path": "paper/results/phase4/20261015T202100Z/calibration/observations/calibration_pulsar-tree_B2_D3_b2.jsonl",
+      "sha256": "a02948302e9e95f63c7327229151870ff4a0fa7f46ec1f5fa06134c5ab28d5f0"
+    }
+  ],
+  "intercept_penalty": 0.0,
+  "l2_strength": 1.0,
+  "optimizer": "deterministic Newton-Raphson with partial-pivot Gauss-Jordan; at most 100 steps; max coefficient delta <= 1e-10",
+  "outcomes": [
+    "accepted",
+    "continued"
+  ],
+  "schema_version": 1,
+  "split_used": "calibration",
+  "training_observation_count_all_actions": 9216,
+  "training_observation_count_selected": 6144
+}

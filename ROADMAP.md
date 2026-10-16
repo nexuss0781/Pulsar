@@ -42,11 +42,15 @@ Evidence: [`cpp/production/benchmark/PHASE3_PROTOCOL.md`](cpp/production/benchma
 
 ## Phase 4 — Calibrate confidence and test adaptive scheduling
 
-Status: not started; gated on Phases 2 and 3.
+Status: completed 2026-10-15; no overall acceleration was established.
 
 Collect verifier-derived acceptance labels and candidate-side features. Split calibration, tuning, and evaluation by prompt/context groups. Report Brier score and calibration by depth, workload, and the scheduler-selected distribution. Compare the learned confidence scheduler with the best tuning-selected fixed tree and an oracle upper bound. Keep calibration, EMA/bandit updates, and scheduling policies separately testable before combining them.
 
 Performance claim gate: exactness passes, calibration is evaluated on held-out groups, and the adaptive policy improves the declared end-to-end objective over the best fixed policy on predeclared workloads, with an appropriate positive paired confidence bound. A calibration gain alone is not a throughput pass. If it does not beat the fixed policy, report that honestly and keep the simpler policy.
+
+Outcome on the CPU-only TinyStories 15M fixture: adaptive versus the tuning-selected fixed tree passed the throughput/p95 gate at batch 1 (throughput ratio 1.049, 95% CI 1.031–1.066; p95 latency ratio 0.944, CI 0.930–0.981). Batch 2 was inconclusive (throughput ratio 1.007, CI 0.989–1.024). The overall adaptive-versus-autoregressive acceleration gate failed at both batch sizes (throughput ratios 0.322 and 0.274); **no overall acceleration was established**. The scheduler chose (1,2) for every batch-1 pulse and for 92.1% of batch-2 pulses, so the batch-1 difference does not demonstrate a benefit from action switching. Keep the adaptive policy experimental.
+
+Evidence: [`PHASE4_PROTOCOL.md`](cpp/production/benchmark/PHASE4_PROTOCOL.md), [`PHASE4_REPORT.md`](paper/results/phase4/20261015T202100Z/PHASE4_REPORT.md), and the selected run artifacts with a relative-path SHA-256 manifest in [`paper/results/phase4/20261015T202100Z/`](paper/results/phase4/20261015T202100Z/).
 
 ## Phase 5 — Production hardening and native architecture validation
 
@@ -64,4 +68,4 @@ Only after the inference path has a stable contract, select a specific model-qua
 
 ## Immediate proposal
 
-Phase 3 is complete. Before Phase 4, keep the measured autoregressive path as the baseline and use its retained fixed-policy results to define the separate adaptive-scheduling hypothesis, workload split, and acceptance gate. No adaptive scheduler, model training, or speedup claim was added to Phase 3.
+Phase 4 is complete, but no overall acceleration was established; keep the adaptive policy experimental and the measured autoregressive path as the baseline. Phase 5 remains the next candidate, but this publication contains no Phase 5 implementation. Do not make a general speedup claim; model training/fine-tuning and quantum mechanisms remain out of scope.

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "pulsar/batch_generation.hpp"
+#include "pulsar/adaptive_scheduler.hpp"
 #include "pulsar_tree_v3.hpp"
 
 #include <algorithm>
@@ -133,7 +134,9 @@ inline std::vector<GenerationResult> generate_candidate_tree_batch(
     const GenerationOptions& options,
     std::size_t branch_factor,
     std::size_t max_depth,
-    std::uint64_t first_request_id = 0) {
+    std::uint64_t first_request_id = 0,
+    AdaptiveTreeScheduler* adaptive_scheduler = nullptr,
+    std::vector<RuntimeTreeObservation>* observations = nullptr) {
     if (options.batch_size == 0 || prompts.size() > options.batch_size) {
         throw std::invalid_argument("request count must be within the configured positive batch size");
     }
@@ -223,7 +226,25 @@ inline std::vector<GenerationResult> generate_candidate_tree_batch(
                     slots == std::numeric_limits<std::size_t>::max() ? slots : slots + 1;
                 context_positions = slots_plus_final;
             }
-            const std::size_t pulse_depth = std::min({max_depth, remaining, context_positions});
+            const std::vector<double> root_draft_row = make_distribution(
+                draft_logits[request], histories[request], options.sampling);
+            CandidateFeatures root_features;
+            if (adaptive_scheduler != nullptr || observations != nullptr) {
+                root_features = candidate_features(root_draft_row);
+            }
+            TreeSchedule selected_schedule{branch_factor, max_depth};
+            if (adaptive_scheduler != nullptr) {
+                selected_schedule = adaptive_scheduler->choose(
+                    first_request_id + static_cast<std::uint64_t>(request),
+                    options.batch_size, root_features, remaining, context_positions);
+                if (selected_schedule.branching > branch_factor ||
+                    selected_schedule.depth > max_depth || selected_schedule.branching == 0 ||
+                    selected_schedule.depth == 0) {
+                    throw std::logic_error("adaptive scheduler selected an action outside its allocated bound");
+                }
+            }
+            const std::size_t pulse_depth = std::min({selected_schedule.depth, remaining,
+                                                       context_positions});
             if (pulse_depth == 0) {
                 throw std::logic_error("active candidate-tree request has no verifier positions");
             }
@@ -244,7 +265,7 @@ inline std::vector<GenerationResult> generate_candidate_tree_batch(
                         throw std::logic_error("candidate-tree root context was registered more than once");
                     }
                     next_node_index = 1;
-                    return make_distribution(draft_logits[request], context, options.sampling);
+                    return root_draft_row;
                 }
                 if (tree_context.empty()) {
                     throw std::logic_error("candidate-tree child context is empty");
@@ -273,7 +294,7 @@ inline std::vector<GenerationResult> generate_candidate_tree_batch(
 
             const auto tree_build_started = std::chrono::steady_clock::now();
             const pulsar::v3::CandidateTree tree = pulsar::v3::build_candidate_tree(
-                root_tree_context, branch_factor, pulse_depth, draft_row);
+                root_tree_context, selected_schedule.branching, pulse_depth, draft_row);
             result.candidate_tree_build_ms += std::chrono::duration<double, std::milli>(
                 std::chrono::steady_clock::now() - tree_build_started).count();
             ++result.candidate_tree_pulses;
@@ -315,11 +336,32 @@ inline std::vector<GenerationResult> generate_candidate_tree_batch(
                     tree, root_tree_context, target_row, random_engines[request],
                     [&target](detail::TreeToken token) {
                         return target.is_end_token(detail::to_runtime_token(token));
-                    });
+                    }, adaptive_scheduler != nullptr || observations != nullptr);
             result.candidate_tree_verification_ms += std::chrono::duration<double, std::milli>(
                 std::chrono::steady_clock::now() - tree_verify_started).count();
             if (block.emitted_tokens.empty()) {
                 throw std::logic_error("candidate-tree verifier made no generation progress");
+            }
+            for (const pulsar::v3::CandidateTreeResult::Decision& decision : block.decisions) {
+                RuntimeTreeObservation observation;
+                observation.request_id = first_request_id + static_cast<std::uint64_t>(request);
+                observation.batch_size = options.batch_size;
+                observation.branching = selected_schedule.branching;
+                observation.configured_depth = selected_schedule.depth;
+                observation.pulse_depth = pulse_depth;
+                observation.pulse_index = result.candidate_tree_pulses - 1;
+                observation.depth = decision.depth;
+                observation.root_features = root_features;
+                observation.node_features = CandidateFeatures{
+                    decision.q_max_probability, decision.q_top_two_margin,
+                    decision.q_normalized_entropy};
+                observation.proposal_probability = decision.proposal_probability;
+                observation.accepted = decision.accepted;
+                observation.continuation_label_available =
+                    decision.continuation_label_available;
+                observation.continued = decision.continued;
+                if (adaptive_scheduler != nullptr) adaptive_scheduler->observe(observation);
+                if (observations != nullptr) observations->push_back(observation);
             }
             result.draft_proposals += block.proposed_tokens.size();
             result.accepted_proposals += block.accepted_count;
