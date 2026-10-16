@@ -3,6 +3,7 @@
 #include "pulsar/tree_generation.hpp"
 
 #include <cerrno>
+#include <csignal>
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
@@ -20,6 +21,16 @@ namespace {
 using pulsar::runtime::GenerationOptions;
 using pulsar::runtime::LlamaModel;
 using pulsar::runtime::LlamaModelOptions;
+
+volatile std::sig_atomic_t cancellation_signal = 0;
+
+void record_cancellation_signal(int signal_number) noexcept {
+    cancellation_signal = signal_number;
+}
+
+int cancellation_exit_status() noexcept {
+    return cancellation_signal == 0 ? 0 : 128 + cancellation_signal;
+}
 
 struct CliOptions {
     std::string model_path;
@@ -69,6 +80,7 @@ void usage(std::ostream& out) {
         << "  --top-p X                Nucleus probability in (0,1]; default 0.95\n"
         << "  --repeat-penalty X       >= 1; default 1.0 (disabled)\n"
         << "  --repeat-window N        Recent tokens to penalize; default 64\n"
+        << "  SIGINT/SIGTERM           Best-effort cancellation between inference steps\n"
         << "  --help                   Show this help\n";
 }
 
@@ -328,6 +340,8 @@ void process_prompts(LlamaModel& model,
 }  // namespace
 
 int main(int argc, char** argv) {
+    std::signal(SIGINT, record_cancellation_signal);
+    std::signal(SIGTERM, record_cancellation_signal);
     try {
         bool show_help = false;
         const CliOptions cli = parse_args(argc, argv, show_help);
@@ -382,12 +396,13 @@ int main(int argc, char** argv) {
         generation.batch_size = cli.batch_size;
         generation.seed = cli.seed;
         generation.sampling = cli.sampling;
+        generation.cancellation_requested = [] { return cancellation_signal != 0; };
 
         if (cli.has_prompt) {
             process_prompts(model, draft_model.get(), {cli.prompt}, generation,
                             cli.speculative_tokens, tree_mode, cli.tree_branching,
                             cli.tree_depth, 0, *output);
-            return 0;
+            return cancellation_exit_status();
         }
 
         std::ifstream input_file;
@@ -404,7 +419,7 @@ int main(int argc, char** argv) {
         prompts.reserve(cli.batch_size);
         std::string line;
         std::uint64_t request_id = 0;
-        while (std::getline(*input, line)) {
+        while (cancellation_signal == 0 && std::getline(*input, line)) {
             if (!line.empty() && line.back() == '\r') {
                 line.pop_back();
             }
@@ -417,15 +432,18 @@ int main(int argc, char** argv) {
                 prompts.clear();
             }
         }
-        if (input->bad()) {
+        if (input->bad() && cancellation_signal == 0) {
             throw std::runtime_error("failed while reading prompt input");
+        }
+        if (cancellation_signal != 0) {
+            return cancellation_exit_status();
         }
         if (!prompts.empty()) {
             process_prompts(model, draft_model.get(), prompts, generation,
                             cli.speculative_tokens, tree_mode, cli.tree_branching,
                             cli.tree_depth, request_id, *output);
         }
-        return 0;
+        return cancellation_exit_status();
     } catch (const std::exception& error) {
         std::cerr << "pulsar-generate: " << error.what() << '\n';
         return 2;

@@ -1,0 +1,35 @@
+{
+  "binary": "/tmp/pulsar-phase4-build/pulsar-generate",
+  "checks": [
+    "help",
+    "invalid_path_and_numeric_bounds",
+    "malformed_gguf",
+    "llama_quant_pair_chain_speculation",
+    "llama_quant_pair_candidate_tree",
+    "gpt2_long_context_and_four_warm_runs",
+    "16_requests_in_four_microbatches_and_file_output",
+    "sigint_partial_jsonl_cancellation",
+    "resource_limit_failure_is_non_signal_exit"
+  ],
+  "gpt2_family": {
+    "completion_tokens": 4,
+    "finish_reason": "max_tokens",
+    "prompt_tokens": 961
+  },
+  "llama_family": {
+    "completion_tokens": 8,
+    "finish_reason": "max_tokens",
+    "prompt_tokens": 11
+  },
+  "resource_pressure": {
+    "address_space_limit_mib": 384,
+    "diagnostic": "    = 10000.0\nllama_context: freq_scale            = 1\nllama_context: n_rs_seq              = 0\nllama_context: n_outputs_max         = 512\nllama_context: n_outputs_max_per_seq = 512\nllama_context: n_ctx_seq (65536) > n_ctx_train (256) -- possible training context overflow\nset_abort_callback: call\nllama_context:        CPU  output buffer size =     7.81 MiB\nllama_kv_cache: layer   0: dev = CPU\nllama_kv_cache: layer   1: dev = CPU\nllama_kv_cache: layer   2: dev = CPU\nllama_kv_cache: layer   3: dev = CPU\nllama_kv_cache: layer   4: dev = CPU\nllama_kv_cache: layer   5: dev = CPU\nggml_aligned_malloc: insufficient memory (attempted to allocate 27648.00 MB)\nggml_backend_cpu_buffer_type_alloc_buffer: failed to allocate buffer of size 28991029248\nggml_backend_buft_alloc_buffer_n_default: failed to allocate CPU buffer of size 28991029248\nllama_init_from_model: failed to initialize the context: failed to allocate buffer for kv cache\npulsar-generate: llama.cpp could not create an inference context\n",
+    "exit_status": 2
+  },
+  "status": "PASS",
+  "warm_runs": {
+    "performance_claim": false,
+    "runs": 4,
+    "same_text": true
+  }
+}

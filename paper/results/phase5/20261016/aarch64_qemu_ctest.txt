@@ -1,0 +1,10 @@
+Internal ctest changing into directory: /dev/shm/pulsar-phase5-arm64
+Test project /dev/shm/pulsar-phase5-arm64
+    Start 1: pulsar_runtime_tests
+1/2 Test #1: pulsar_runtime_tests .............   Passed    0.50 sec
+    Start 2: pulsar_tree_v3_tests
+2/2 Test #2: pulsar_tree_v3_tests .............   Passed   45.95 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =  46.46 sec

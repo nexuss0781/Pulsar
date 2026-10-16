@@ -5,6 +5,7 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <random>
 #include <stdexcept>
 #include <string>
@@ -46,12 +47,15 @@ struct GenerationOptions {
     std::size_t batch_size = 1;
     std::uint64_t seed = 1;
     SamplingConfig sampling{};
+    // Checked between bounded inference steps. This cannot interrupt an active backend call.
+    std::function<bool()> cancellation_requested;
 };
 
 enum class FinishReason {
     end_of_generation,
     max_tokens,
     context_limit,
+    cancelled,
 };
 
 struct GenerationResult {
@@ -74,8 +78,26 @@ inline const char* to_string(FinishReason reason) noexcept {
         case FinishReason::end_of_generation: return "end_of_generation";
         case FinishReason::max_tokens: return "max_tokens";
         case FinishReason::context_limit: return "context_limit";
+        case FinishReason::cancelled: return "cancelled";
     }
     return "unknown";
+}
+
+inline void mark_unfinished_cancelled(std::vector<GenerationResult>& results,
+                                      std::vector<bool>& finished,
+                                      std::size_t& active_count,
+                                      double elapsed_ms) {
+    for (std::size_t i = 0; i < results.size(); ++i) {
+        if (finished[i]) continue;
+        finished[i] = true;
+        results[i].finish_reason = FinishReason::cancelled;
+        results[i].elapsed_ms = elapsed_ms;
+        --active_count;
+    }
+}
+
+inline bool is_cancellation_requested(const GenerationOptions& options) {
+    return options.cancellation_requested && options.cancellation_requested();
 }
 
 inline std::uint64_t splitmix64(std::uint64_t value) noexcept {
@@ -142,6 +164,12 @@ inline std::vector<GenerationResult> generate_batch(
     std::vector<bool> finished(prompts.size(), false);
     std::size_t active_count = prompts.size();
     while (active_count != 0) {
+        if (is_cancellation_requested(options)) {
+            const double elapsed = std::chrono::duration<double, std::milli>(
+                std::chrono::steady_clock::now() - started).count();
+            mark_unfinished_cancelled(results, finished, active_count, elapsed);
+            break;
+        }
         std::vector<SequenceInput> decode_inputs;
         std::vector<std::size_t> decode_sequences;
         decode_inputs.reserve(active_count);

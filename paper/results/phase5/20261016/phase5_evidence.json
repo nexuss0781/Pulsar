@@ -1,0 +1,106 @@
+{
+  "date": "2026-10-16",
+  "disposition": "hardening_pass_complete_release_gate_open",
+  "production_readiness_declared": false,
+  "phase3_publication": {
+    "remote": "origin",
+    "branch": "main",
+    "commit": "ed910fcbf93a7078663bcca9b5bf56492b11c376",
+    "status": "remote head matches approved commit; no duplicate push made"
+  },
+  "source": {
+    "llama_cpp_commit": "cd0a5b6a180dff0048e5fd993098b21c0b2c91b8",
+    "working_copy": "/workspace/pulsar-phase4-isolated",
+    "phase5_changes_added_to_publication_checkout": false,
+    "publication_checkout_status_observed": "staged Phase 4 files present at final audit; left untouched by Phase 5"
+  },
+  "host": {
+    "kernel": "Linux 6.18.38+",
+    "native_architecture": "x86_64",
+    "compiler": "GCC 13.3.0",
+    "cmake": "3.28.3",
+    "x86_compile_flags": ["-msse4.2", "-mf16c", "-mfma", "-mbmi2", "-mavx", "-mavx2"],
+    "avx512_enabled": false,
+    "avx_vnni_enabled": false,
+    "ggml_native": false,
+    "ggml_cpu_all_variants": false,
+    "runtime_cpu_variant_dispatch": false
+  },
+  "tests": {
+    "native_x86_release_build": "PASS",
+    "native_x86_ctest": {"passed": 3, "total": 3},
+    "native_runtime_groups": 16,
+    "real_model_cli_smoke": {"status": "PASS", "checks": 9},
+    "address_space_pressure": {
+      "limit_mib": 384,
+      "reported_attempted_allocation_mb": 27648,
+      "exit_status": 2,
+      "terminated_by_signal": false
+    },
+    "sigint_cancellation": {"status": "PASS", "exit_status": 130, "finish_reason": "cancelled"},
+    "warm_repeats": {"count": 4, "identical_fixed_seed_text": true, "performance_claim": false},
+    "asan_ubsan": {"status": "PASS", "ctest_passed": 3, "ctest_total": 3, "llama_backend_linked": false},
+    "aarch64_cross_qemu": {
+      "status": "PASS",
+      "target": "AArch64 Linux armv8-a",
+      "compiler": "GNU 13.3.0",
+      "qemu": "8.2.2 user-mode",
+      "ctest_passed": 2,
+      "ctest_total": 2,
+      "installed_cli_help": "PASS",
+      "downstream_consumer": "PASS under QEMU",
+      "real_tinyllama_inference": "PASS under QEMU",
+      "native_arm64_hardware": false
+    },
+    "native_install_consumer": "PASS"
+  },
+  "fixtures": [
+    {
+      "repository": "https://huggingface.co/tensorblock/tinyllama-15M-stories-GGUF",
+      "architecture": "llama",
+      "context_length": 256,
+      "quantization": "Q2_K",
+      "file": "/tmp/pulsar-smoke.gguf",
+      "size_bytes": 13717344,
+      "sha256": "f7e39dc9f26f3d39bf59e885349c6eec65880f685322d591f53e6cdb46ceb2e9",
+      "license": "MIT"
+    },
+    {
+      "repository": "https://huggingface.co/tensorblock/tinyllama-15M-stories-GGUF",
+      "architecture": "llama",
+      "context_length": 256,
+      "quantization": "Q3_K_M",
+      "file": "/tmp/pulsar-smoke-draft.gguf",
+      "size_bytes": 14028384,
+      "sha256": "58e4a0c44851897f4007f9c9018822348f7d74851790fa0ea1370ed82c36e003",
+      "license": "MIT"
+    },
+    {
+      "repository": "https://huggingface.co/afrideva/Tinystories-gpt-0.1-3m-GGUF",
+      "metadata_api": "https://huggingface.co/api/models/afrideva/Tinystories-gpt-0.1-3m-GGUF",
+      "architecture": "gpt2",
+      "context_length": 2048,
+      "quantization": "Q2_K",
+      "file": "/tmp/pulsar-smoke-gpt2-q2.gguf",
+      "size_bytes": 7754464,
+      "sha256": "0cfb3ef83cd05fba1daa40a8a0207edb7f4e9f9992bcf43b0bc6e679d6e8e58b",
+      "license": "not declared in fetched metadata; fixture not redistributed"
+    }
+  ],
+  "evidence_files": [
+    "native_x86_ctest.txt",
+    "native_x86_runtime_tests.txt",
+    "real_model_smoke.json",
+    "sanitizer_ctest.txt",
+    "aarch64_qemu_ctest.txt",
+    "aarch64_qemu_install.txt",
+    "aarch64_qemu_model.jsonl"
+  ],
+  "open_gates": [
+    "native ARM64 hardware build and runtime validation",
+    "broader real-model GGUF and tokenizer compatibility matrix",
+    "broad real-model statistical exactness study",
+    "end-to-end production deployment and operational failure-injection matrix"
+  ],
+  "performance_claim": null
+}
